@@ -122,16 +122,41 @@ class AuthViewModel @Inject constructor(
     ) {
         viewModelScope.launch {
 
+            if (_isLoading.value) return@launch   // evita cliques duplos
+
+            // ⭐ VALIDAÇÕES
+            if (firstName.isBlank() || lastName.isBlank()) {
+                onError("Preenche o nome completo.")
+                return@launch
+            }
+
+            if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+                onError("Email inválido.")
+                return@launch
+            }
+
+            if (password.length < 6) {
+                onError("A palavra-passe deve ter pelo menos 6 caracteres.")
+                return@launch
+            }
+
+            _isLoading.value = true
+
             val result = repository.registerUser(
-                firstName,
-                lastName,
-                email,
+                firstName.trim(),
+                lastName.trim(),
+                email.trim(),
                 password
             )
 
-            if (result) onSuccess()
-            else onError("Erro ao criar conta")
+            _isLoading.value = false
+
+            when (result) {
+                true -> onSuccess()
+                false -> onError("Não foi possível criar a conta. Tente outro email.")
+            }
         }
     }
+
 
 }

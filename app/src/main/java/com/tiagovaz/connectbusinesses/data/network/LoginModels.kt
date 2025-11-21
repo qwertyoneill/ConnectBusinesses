@@ -19,6 +19,3 @@ data class UserData(
     val first_name: String,
     val last_name: String
 )
-data class UserResponse(
-    val data: UserData?
-)

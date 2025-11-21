@@ -17,6 +17,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.vectorResource
@@ -35,23 +36,26 @@ fun RegisterScreen(
     onBackToLogin: () -> Unit,
     authViewModel: AuthViewModel = hiltViewModel()
 ) {
+    val focusManager = LocalFocusManager.current
+    val context = LocalContext.current
+
     var firstName by remember { mutableStateOf("") }
     var lastName by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
 
-    var loading by remember { mutableStateOf(false) }
-    var error by remember { mutableStateOf("") }
-
     var passVisible by remember { mutableStateOf(false) }
     var confirmPassVisible by remember { mutableStateOf(false) }
 
-    val focusManager = LocalFocusManager.current
+    // NOVO: observar estado do ViewModel
+    val isLoading by authViewModel.isLoading.collectAsState()
+
+    var errorMessage by remember { mutableStateOf("") }
 
     Box(modifier = Modifier.fillMaxSize()) {
 
-        // 🖼️ Mesmo fundo do Login
+        // Fundo igual ao Login
         Image(
             painter = painterResource(id = R.drawable.login_background),
             contentDescription = null,
@@ -79,7 +83,6 @@ fun RegisterScreen(
                 )
         )
 
-        // 📦 FORMULÁRIO
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -112,30 +115,10 @@ fun RegisterScreen(
 
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
 
-                    // ------------------- CAMPOS -------------------
+                    RegisterInputField("Primeiro Nome", firstName, { firstName = it }, null)
+                    RegisterInputField("Último Nome", lastName, { lastName = it }, null)
+                    RegisterInputField("Email", email, { email = it }, ImageVector.vectorResource(R.drawable.ic_email))
 
-                    RegisterInputField(
-                        label = "Primeiro Nome",
-                        value = firstName,
-                        onChange = { firstName = it },
-                        icon = null
-                    )
-
-                    RegisterInputField(
-                        label = "Último Nome",
-                        value = lastName,
-                        onChange = { lastName = it },
-                        icon = null
-                    )
-
-                    RegisterInputField(
-                        label = "Email",
-                        value = email,
-                        onChange = { email = it },
-                        icon = ImageVector.vectorResource(R.drawable.ic_email)
-                    )
-
-                    // PASSWORD
                     RegisterInputField(
                         label = "Password",
                         value = password,
@@ -146,7 +129,6 @@ fun RegisterScreen(
                         onToggleVisibility = { passVisible = !passVisible }
                     )
 
-                    // CONFIRM PASSWORD
                     RegisterInputField(
                         label = "Confirmar Password",
                         value = confirmPassword,
@@ -157,40 +139,22 @@ fun RegisterScreen(
                         onToggleVisibility = { confirmPassVisible = !confirmPassVisible }
                     )
 
-                    // ---------------- VALIDATIONS -----------------
-
-                    if (error.isNotEmpty()) {
+                    if (errorMessage.isNotEmpty()) {
                         Spacer(Modifier.height(8.dp))
-                        Text(error, color = Color.Red, fontSize = 14.sp)
+                        Text(errorMessage, color = Color.Red, fontSize = 14.sp)
                     }
 
                     Spacer(Modifier.height(24.dp))
 
-                    // ---------------- BOTÃO REGISTAR -----------------
-
                     Button(
                         onClick = {
                             focusManager.clearFocus()
-                            error = ""
-
-                            // VALIDAR PASSWORDS
-                            if (password.length < 6) {
-                                error = "A password deve ter pelo menos 6 caracteres."
-                                return@Button
-                            }
+                            errorMessage = ""
 
                             if (password != confirmPassword) {
-                                error = "As passwords não coincidem."
+                                errorMessage = "As passwords não coincidem."
                                 return@Button
                             }
-
-                            // VALIDAR EMAIL
-                            if (!email.contains("@") || !email.contains(".")) {
-                                error = "Email inválido."
-                                return@Button
-                            }
-
-                            loading = true
 
                             authViewModel.register(
                                 firstName,
@@ -198,23 +162,22 @@ fun RegisterScreen(
                                 email,
                                 password,
                                 onSuccess = {
-                                    loading = false
                                     onRegisterSuccess()
                                 },
                                 onError = {
-                                    loading = false
-                                    error = it
+                                    errorMessage = it
                                 }
                             )
                         },
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(50.dp),
+                        enabled = !isLoading,
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Color(0xFF007FFF)
                         )
                     ) {
-                        if (loading)
+                        if (isLoading)
                             CircularProgressIndicator(color = Color.White, modifier = Modifier.size(22.dp))
                         else
                             Text("Registar", color = Color.White, fontWeight = FontWeight.Bold)
@@ -222,7 +185,6 @@ fun RegisterScreen(
 
                     Spacer(Modifier.height(20.dp))
 
-                    // VOLTAR AO LOGIN
                     TextButton(onClick = { onBackToLogin() }) {
                         Text(
                             "Voltar ao Login",
@@ -235,7 +197,6 @@ fun RegisterScreen(
         }
     }
 }
-
 @Composable
 private fun RegisterInputField(
     label: String,

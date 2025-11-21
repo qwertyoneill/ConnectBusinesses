@@ -22,14 +22,16 @@ interface DirectusService {
     @GET("users/me")
     suspend fun getMe(
         @Header("Authorization") token: String
-    ): Response<UserResponse>
+    ): Response<UserProfileResponse>
 
     @POST("auth/refresh")
     suspend fun refreshToken(
         @Body body: Map<String, String>
     ): Response<LoginResponse>
 
-    @POST("auth/register")
-    suspend fun register(@Body body: Map<String, Any>): Response<Unit>
+    @POST("users")
+    suspend fun register(
+        @Body request: CreateUserRequest
+    ): Response<CreateUserResponse>
 
 }
