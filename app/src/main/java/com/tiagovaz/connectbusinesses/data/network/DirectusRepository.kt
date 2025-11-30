@@ -50,7 +50,8 @@ class DirectusRepository @Inject constructor(
                 email = email,
                 password = password,
                 first_name = firstName,
-                last_name = lastName
+                last_name = lastName,
+                role = "6763d137-f4ab-4413-9566-4eb5305b1210"
             )
 
             val response = api.register(request)
