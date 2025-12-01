@@ -59,10 +59,19 @@ class AuthViewModel @Inject constructor(
                 _isLoggedIn.value = true
 
                 val profileResponse = repository.getMe(authToken)
-                val finalUserName = profileResponse?.data?.first_name ?: ""
+                Log.e("AUTH_VM", "PROFILE = ${profileResponse}")
+                Log.e("AUTH_VM", "FIRST = ${profileResponse?.data?.first_name}")
+                Log.e("AUTH_VM", "LAST = ${profileResponse?.data?.last_name}")
+                val user = profileResponse?.data
+
+                val finalUserName = listOfNotNull(
+                    user?.first_name,
+                    user?.last_name
+                ).joinToString(" ")
 
                 dataStoreManager.saveUserName(finalUserName)
                 _userName.value = finalUserName
+
                 Log.d("AUTH_VM", "User logged in: $finalUserName")
             } else {
                 _loginError.value = "Email ou password incorretos"
@@ -81,6 +90,9 @@ class AuthViewModel @Inject constructor(
                     _token.value = savedToken
                     _isLoggedIn.value = true
                     _userName.value = dataStoreManager.userName.first()
+                    Log.e("AUTH_VM", "CHECK_LOGIN profile = $profile")
+                    Log.e("AUTH_VM", "CHECK_LOGIN name = ${profile?.data?.first_name} ${profile?.data?.last_name}")
+
                 } else {
                     dataStoreManager.clearAll()
                     _isLoggedIn.value = false
