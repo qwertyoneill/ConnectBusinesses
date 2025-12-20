@@ -15,15 +15,12 @@ class DirectusRepository @Inject constructor(
             null
         }
     }
-
     suspend fun fetchLeads(token: String) = try {
         api.getLeads("Bearer $token").body()?.data
     } catch (e: Exception) { null }
-
     suspend fun fetchLeadDetails(token: String, leadId: String) = try {
         api.getLeadDetails("Bearer $token", leadId).body()?.data
     } catch (e: Exception) { null }
-
     suspend fun getMe(token: String): UserProfileResponse? {
         return try {
             val response = api.getMe("Bearer $token")
@@ -38,20 +35,13 @@ class DirectusRepository @Inject constructor(
         api.refreshToken(mapOf("refresh_token" to refreshToken))
             .body()?.data?.access_token
     } catch (e: Exception) { null }
-
-    suspend fun registerUser(
-        firstName: String,
-        lastName: String,
-        email: String,
-        password: String
-    ): Boolean {
+    suspend fun registerUser(firstName: String,lastName: String, email: String, password: String): Boolean {
         return try {
             val request = CreateUserRequest(
                 email = email,
                 password = password,
                 first_name = firstName,
-                last_name = lastName,
-                role = "931e544f-ea6e-47e0-b5c5-334d42da6441"
+                last_name = lastName
             )
 
             val response = api.register(request)
