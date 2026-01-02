@@ -2,8 +2,9 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.compose")
-    id("kotlin-kapt")
+    id("org.jetbrains.kotlin.kapt")
     id("com.google.dagger.hilt.android")
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -40,8 +41,6 @@ dependencies {
     implementation(platform("androidx.compose:compose-bom:2024.09.01"))
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-tooling-preview")
-    implementation(libs.androidx.material3)
-    implementation(libs.androidx.ui)
     debugImplementation("androidx.compose.ui:ui-tooling")
     implementation("androidx.compose.material3:material3")
     implementation("androidx.compose.material:material-icons-extended")
@@ -54,6 +53,19 @@ dependencies {
     implementation("com.google.accompanist:accompanist-navigation-animation:0.36.0")
     implementation("androidx.compose.foundation:foundation:1.7.4")
 
+    // Credential Manager (MODERNO)
+    implementation("androidx.credentials:credentials:1.6.0-rc01")
+    implementation("androidx.credentials:credentials-play-services-auth:1.6.0-rc01")
+
+    // Google Identity (MODERNO)
+    implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
+
+
+    // 🔥 Firebase BOM (2025)
+    implementation(platform("com.google.firebase:firebase-bom:34.7.0"))
+
+    // 🔐 Firebase Authentication
+    implementation("com.google.firebase:firebase-auth")
 
     // Hilt
     implementation("com.google.dagger:hilt-android:2.51.1")

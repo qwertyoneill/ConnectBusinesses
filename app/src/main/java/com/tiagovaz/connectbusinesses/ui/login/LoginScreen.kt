@@ -1,6 +1,12 @@
 package com.tiagovaz.connectbusinesses.ui.login
 
-import androidx.compose.animation.core.*
+import android.util.Log
+import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.runtime.LaunchedEffect
+import kotlinx.coroutines.launch
+import androidx.compose.runtime.rememberCoroutineScope
+import com.tiagovaz.connectbusinesses.auth.FirebaseGoogleAuth
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -213,13 +219,29 @@ fun LoginFields(
             )
         }
         Spacer(Modifier.height(16.dp))
-
+        val context = LocalContext.current
+        val googleAuth = remember { FirebaseGoogleAuth(context) }
+        val scope = rememberCoroutineScope()
         // Ícones sociais
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
-            IconButton(onClick = { /* TODO login Google */ }) {
+            IconButton(
+                onClick = {
+                    scope.launch {
+                        googleAuth.signInWithGoogle(
+                            onSuccess = { email, firstName, lastName, firebaseToken ->
+                                Log.d("GOOGLE_LOGIN","Email=$email | Nome=$firstName $lastName")
+                                viewModel.loginWithFirebaseIdToken(firebaseToken)
+                            },
+                            onError = {
+                                Log.e("GOOGLE_LOGIN", "Erro Google Login", it)
+                            }
+                        )
+                    }
+                }
+            ) {
                 Icon(
                     painter = painterResource(R.drawable.ic_google),
                     contentDescription = "Google",
@@ -227,6 +249,7 @@ fun LoginFields(
                     modifier = Modifier.size(40.dp)
                 )
             }
+
             IconButton(onClick = { /* TODO login Facebook */ }) {
                 Icon(
                     painter = painterResource(R.drawable.ic_facebook),

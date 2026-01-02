@@ -170,5 +170,30 @@ class AuthViewModel @Inject constructor(
         }
     }
 
+    fun loginWithFirebaseIdToken(firebaseIdToken: String) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            _loginError.value = ""
+
+            val resp = repository.firebaseLogin(firebaseIdToken)
+
+            val directusToken = resp?.token
+            val firstName = resp?.user?.first_name.orEmpty()
+
+            if (!directusToken.isNullOrBlank()) {
+                dataStoreManager.saveToken(directusToken)
+                dataStoreManager.saveUserName(firstName)
+                dataStoreManager.saveAuthMethod("firebase")
+
+                _token.value = directusToken
+                _userName.value = firstName
+                _isLoggedIn.value = true
+            } else {
+                _loginError.value = "Falha no login Google."
+            }
+
+            _isLoading.value = false
+        }
+    }
 
 }

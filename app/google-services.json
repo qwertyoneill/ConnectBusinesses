@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "101557164224",
+    "project_id": "connectbusinesses-80496",
+    "storage_bucket": "connectbusinesses-80496.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:101557164224:android:5adab0e962398f6f0ef525",
+        "android_client_info": {
+          "package_name": "com.tiagovaz.connectbusinesses"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "101557164224-g2koa0057vbji3qlcicilb4dt9cnfuv9.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.tiagovaz.connectbusinesses",
+            "certificate_hash": "42da382cbdaee7451227a46b4f39c4f145940560"
+          }
+        },
+        {
+          "client_id": "101557164224-fhc78bl9qj6n7irkfd3v71a0kcgnvu61.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDXR2blnn9T2hLf78gw2w2gse2CSJ1pOSA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "101557164224-fhc78bl9qj6n7irkfd3v71a0kcgnvu61.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,6 +1,8 @@
 package com.tiagovaz.connectbusinesses.data.network
 
 import android.util.Log
+import com.tiagovaz.connectbusinesses.data.network.auth.FirebaseLoginRequest
+import com.tiagovaz.connectbusinesses.data.network.auth.FirebaseLoginResponse
 import javax.inject.Inject
 
 class DirectusRepository @Inject constructor(
@@ -55,6 +57,14 @@ class DirectusRepository @Inject constructor(
         } catch (e: Exception) {
             Log.e("REGISTER", "Exception: ${e.message}")
             false
+        }
+    }
+    suspend fun firebaseLogin(idToken: String): FirebaseLoginResponse? {
+        return try {
+            val response = api.firebaseLogin(FirebaseLoginRequest(idToken))
+            if (response.isSuccessful) response.body() else null
+        } catch (e: Exception) {
+            null
         }
     }
 }

@@ -1,5 +1,7 @@
 package com.tiagovaz.connectbusinesses.data.network
 
+import com.tiagovaz.connectbusinesses.data.network.auth.FirebaseLoginRequest
+import com.tiagovaz.connectbusinesses.data.network.auth.FirebaseLoginResponse
 import retrofit2.Response
 import retrofit2.http.*
 
@@ -33,5 +35,12 @@ interface DirectusService {
     suspend fun register(
         @Body request: CreateUserRequest
     ): Response<CreateUserResponse>
+
+    //Firebase Login
+
+    @POST("firebase-login")
+    suspend fun firebaseLogin(
+        @Body request: FirebaseLoginRequest
+    ): Response<FirebaseLoginResponse>
 
 }

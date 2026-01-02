@@ -68,5 +68,13 @@ class DataStoreManager @Inject constructor(
     suspend fun clearAll() {
         context.dataStore.edit { it.clear() }
     }
+    private val AUTH_METHOD_KEY = stringPreferencesKey("auth_method")
+
+    suspend fun saveAuthMethod(method: String) {
+        context.dataStore.edit { it[AUTH_METHOD_KEY] = method }
+    }
+
+    val authMethod: Flow<String?> = context.dataStore.data.map { it[AUTH_METHOD_KEY] }
+
 }
 
