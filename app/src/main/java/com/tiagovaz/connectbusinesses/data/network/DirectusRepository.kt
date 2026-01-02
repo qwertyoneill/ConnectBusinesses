@@ -45,17 +45,9 @@ class DirectusRepository @Inject constructor(
                 first_name = firstName,
                 last_name = lastName
             )
-
             val response = api.register(request)
-
-            Log.e("REGISTER", "code = ${response.code()}")
-            Log.e("REGISTER", "body = ${response.body()}")
-            Log.e("REGISTER", "errorBody = ${response.errorBody()?.string()}")
-
             response.isSuccessful
-
         } catch (e: Exception) {
-            Log.e("REGISTER", "Exception: ${e.message}")
             false
         }
     }

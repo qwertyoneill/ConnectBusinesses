@@ -232,11 +232,9 @@ fun LoginFields(
                     scope.launch {
                         googleAuth.signInWithGoogle(
                             onSuccess = { email, firstName, lastName, firebaseToken ->
-                                Log.d("GOOGLE_LOGIN","Email=$email | Nome=$firstName $lastName")
                                 viewModel.loginWithFirebaseIdToken(firebaseToken)
                             },
                             onError = {
-                                Log.e("GOOGLE_LOGIN", "Erro Google Login", it)
                             }
                         )
                     }
