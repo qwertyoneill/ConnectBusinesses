@@ -1,12 +1,24 @@
 package com.tiagovaz.connectbusinesses.data.network
 
-data class LeadsResponse(val data: List<LeadItem>)
+import com.google.gson.annotations.SerializedName
+
+data class LeadsResponse(
+    val data: List<LeadItem>
+)
 
 data class LeadItem(
-    val id: String,
+    val id: Int,
+
+    @SerializedName("name")
     val companyName: String?,
+
+    @SerializedName("location")
     val city: String?,
+
+    @SerializedName("description")
     val need: String?,
+
+    @SerializedName("imageUrl")
     val imageUrl: String?
 )
 

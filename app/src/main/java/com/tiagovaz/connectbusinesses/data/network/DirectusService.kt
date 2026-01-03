@@ -36,11 +36,31 @@ interface DirectusService {
         @Body request: CreateUserRequest
     ): Response<CreateUserResponse>
 
-    //Firebase Login
-
+    // Firebase
     @POST("firebase-login")
     suspend fun firebaseLogin(
         @Body request: FirebaseLoginRequest
     ): Response<FirebaseLoginResponse>
+
+    // Swipes do utilizador atual
+    @GET("items/swipes")
+    suspend fun getMySwipes(
+        @Header("Authorization") token: String,
+        @Query("fields") fields: String = "lead"
+    ): Response<SwipesResponse>
+
+    // Criar swipe
+    @POST("items/swipes")
+    suspend fun createSwipe(
+        @Header("Authorization") token: String,
+        @Body body: SwipeCreateRequest
+    ): Response<SwipeCreateResponse>
+
+    @GET("items/matches")
+    suspend fun getMyMatches(
+        @Header("Authorization") token: String,
+        @Query("fields") fields: String =
+            "id,created_at,lead.id,lead.name,lead.location,lead.description,lead.imageUrl"
+    ): Response<MatchesResponse>
 
 }

@@ -10,6 +10,7 @@ fun BottomNavBar(navController: NavController) {
     val items = listOf(
         BottomNavItem.Home,
         BottomNavItem.Leads,
+        BottomNavItem.Matches,
         BottomNavItem.Businesses,
         BottomNavItem.Profile
     )

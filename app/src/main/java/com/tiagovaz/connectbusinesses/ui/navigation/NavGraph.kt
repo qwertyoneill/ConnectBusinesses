@@ -43,5 +43,9 @@ fun NavGraph(
             val id = backStack.arguments?.getString("id")!!
             LeadDetailsScreen(id, navController)
         }
+        composable("matches") {
+            MatchesScreen()
+        }
+
     }
 }

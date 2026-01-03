@@ -15,6 +15,7 @@ import com.tiagovaz.connectbusinesses.ui.components.LeadCard
 import com.tiagovaz.connectbusinesses.ui.components.SwipeStack
 import com.tiagovaz.connectbusinesses.viewmodel.AuthViewModel
 import com.tiagovaz.connectbusinesses.viewmodel.LeadsViewModel
+import kotlin.collections.isNotEmpty
 
 @Composable
 fun LeadsScreen(
@@ -51,9 +52,14 @@ fun LeadsScreen(
                 // 💫 SwipeStack ocupa o ecrã todo — imagem fullscreen
                 SwipeStack(
                     items = leads,
-                    onSwipeLeft = { /* opcional: recusar lead */ },
-                    onSwipeRight = { /* opcional: aceitar lead */ }
-                ) { lead, isActive, shadowColor, borderColor ->
+                    onSwipeLeft = { lead ->
+                        token?.let { leadsViewModel.sendSwipe(it, lead.id, "pass") }
+                    },
+                    onSwipeRight = { lead ->
+                        token?.let { leadsViewModel.sendSwipe(it, lead.id, "like") }
+                    }
+                )
+                { lead, isActive, shadowColor, borderColor ->
                     LeadCard(
                         lead = lead,
                         modifier = Modifier
@@ -65,6 +71,7 @@ fun LeadsScreen(
                         borderColor = borderColor
                     )
                 }
+
             }
 
             else -> {
