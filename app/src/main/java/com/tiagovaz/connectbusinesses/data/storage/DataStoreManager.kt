@@ -75,6 +75,17 @@ class DataStoreManager @Inject constructor(
     }
 
     val authMethod: Flow<String?> = context.dataStore.data.map { it[AUTH_METHOD_KEY] }
+    private val LAST_MATCH_SEEN = stringPreferencesKey("last_match_seen")
+
+    suspend fun saveLastMatchSeen(timestamp: String) {
+        context.dataStore.edit {
+            it[LAST_MATCH_SEEN] = timestamp
+        }
+    }
+
+    val lastMatchSeen: Flow<String?> =
+        context.dataStore.data.map { it[LAST_MATCH_SEEN] }
+
 
 }
 

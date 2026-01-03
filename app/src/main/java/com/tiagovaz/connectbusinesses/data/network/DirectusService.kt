@@ -58,9 +58,7 @@ interface DirectusService {
 
     @GET("items/matches")
     suspend fun getMyMatches(
-        @Header("Authorization") token: String,
-        @Query("fields") fields: String =
-            "id,created_at,lead.id,lead.name,lead.location,lead.description,lead.imageUrl"
+        @Header("Authorization") token: String
     ): Response<MatchesResponse>
 
 }

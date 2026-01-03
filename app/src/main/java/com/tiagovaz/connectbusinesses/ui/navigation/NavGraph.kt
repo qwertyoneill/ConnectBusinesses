@@ -44,7 +44,7 @@ fun NavGraph(
             LeadDetailsScreen(id, navController)
         }
         composable("matches") {
-            MatchesScreen()
+            MatchesScreen(navController, authViewModel = authViewModel)
         }
 
     }

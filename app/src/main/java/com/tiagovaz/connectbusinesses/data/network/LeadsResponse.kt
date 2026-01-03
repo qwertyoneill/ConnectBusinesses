@@ -21,7 +21,6 @@ data class LeadItem(
     @SerializedName("imageUrl")
     val imageUrl: String?
 )
-
 data class LeadDetailsResponse(
     val data: LeadItem?
 )

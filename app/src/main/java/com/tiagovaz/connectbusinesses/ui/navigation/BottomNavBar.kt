@@ -6,7 +6,8 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 
 @Composable
-fun BottomNavBar(navController: NavController) {
+fun BottomNavBar(navController: NavController,
+                 hasNewMatch: Boolean) {
     val items = listOf(
         BottomNavItem.Home,
         BottomNavItem.Leads,
@@ -23,7 +24,17 @@ fun BottomNavBar(navController: NavController) {
             NavigationBarItem(
                 selected = currentRoute == item.route,
                 onClick = { navController.navigate(item.route) },
-                icon = { Icon(item.icon, contentDescription = item.label) },
+                icon = {
+                    BadgedBox(
+                        badge = {
+                            if (item.route == BottomNavItem.Matches.route && hasNewMatch) {
+                                Badge()
+                            }
+                        }
+                    ) {
+                        Icon(item.icon, contentDescription = item.label)
+                    }
+                },
                 label = { Text(item.label) }
             )
         }
