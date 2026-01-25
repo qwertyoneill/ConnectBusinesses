@@ -2,6 +2,8 @@ package com.tiagovaz.connectbusinesses.data.network
 
 import com.tiagovaz.connectbusinesses.data.network.auth.FirebaseLoginRequest
 import com.tiagovaz.connectbusinesses.data.network.auth.FirebaseLoginResponse
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 class DirectusRepository @Inject constructor(
@@ -45,15 +47,24 @@ class DirectusRepository @Inject constructor(
         false
     }
 
-    suspend fun fetchMatches(token: String): List<MatchItem> = try {
-        api.getMyMatches("Bearer $token")
-            .body()
-            ?.data
-            ?: emptyList()
-    } catch (e: Exception) {
-        emptyList()
-    }
+    suspend fun fetchMatches(token: String): Result<List<MatchViewItem>> {
+        return try {
+            val response = api.getMyMatches("Bearer $token")
 
+            if (response.isSuccessful) {
+                val matches = response.body()?.data ?: emptyList()
+                Result.success(matches)
+            } else {
+                Result.failure(
+                    Exception(
+                        "Erro ${response.code()}: ${response.errorBody()?.string()}"
+                    )
+                )
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 
 
     // ---------------- AUTH / PERFIL ----------------

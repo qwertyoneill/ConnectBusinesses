@@ -12,19 +12,17 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
-import com.tiagovaz.connectbusinesses.data.network.MatchItem
+import com.tiagovaz.connectbusinesses.data.network.MatchViewItem
 
 @Composable
 fun MatchCard(
-    match: MatchItem,
+    match: MatchViewItem,
     onClick: () -> Unit
 ) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable(enabled = onClick != null) {
-                onClick?.invoke()
-            },
+            .clickable { onClick() },
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(6.dp)
     ) {
@@ -34,11 +32,9 @@ fun MatchCard(
                 .padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-
-            // 🖼️ Imagem do lead
             Image(
                 painter = rememberAsyncImagePainter(
-                    match.lead.imageUrl
+                    match.other_avatar
                         ?: "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=400"
                 ),
                 contentDescription = null,
@@ -50,26 +46,21 @@ fun MatchCard(
 
             Spacer(Modifier.width(12.dp))
 
-            // 📄 Info
-            Column(
-                modifier = Modifier.weight(1f)
-            ) {
+            Column(Modifier.weight(1f)) {
                 Text(
-                    text = match.lead.companyName ?: "Empresa",
+                    text = match.lead_name ?: "Lead",
                     style = MaterialTheme.typography.titleMedium
                 )
                 Spacer(Modifier.height(4.dp))
                 Text(
-                    text = match.lead.city ?: "",
+                    text = listOfNotNull(match.other_first_name, match.other_last_name)
+                        .joinToString(" ")
+                        .ifBlank { "Utilizador" },
                     style = MaterialTheme.typography.bodySmall
                 )
             }
 
-            // 🤝 Badge
-            AssistChip(
-                onClick = {},
-                label = { Text("Match") }
-            )
+            AssistChip(onClick = {}, label = { Text("Match") })
         }
     }
 }

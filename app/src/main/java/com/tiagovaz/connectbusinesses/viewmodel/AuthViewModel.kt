@@ -1,9 +1,7 @@
 package com.tiagovaz.connectbusinesses.viewmodel
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import coil.util.CoilUtils.result
 import com.tiagovaz.connectbusinesses.data.network.DirectusRepository
 import com.tiagovaz.connectbusinesses.data.storage.DataStoreManager
 import dagger.hilt.android.lifecycle.HiltViewModel

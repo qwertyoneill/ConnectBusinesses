@@ -6,6 +6,7 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -86,6 +87,13 @@ class DataStoreManager @Inject constructor(
     val lastMatchSeen: Flow<String?> =
         context.dataStore.data.map { it[LAST_MATCH_SEEN] }
 
+    suspend fun getAccessToken(): String?
+    {
+        return token.first()
+    }
 
+    suspend fun getRefreshToken(): String? {
+        return refreshToken.first()
+    }
 }
 

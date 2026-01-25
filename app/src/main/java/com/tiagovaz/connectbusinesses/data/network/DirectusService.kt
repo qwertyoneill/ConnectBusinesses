@@ -56,9 +56,9 @@ interface DirectusService {
         @Body body: SwipeCreateRequest
     ): Response<SwipeCreateResponse>
 
-    @GET("items/matches")
+    @GET("items/matches_view")
     suspend fun getMyMatches(
         @Header("Authorization") token: String
-    ): Response<MatchesResponse>
+    ): Response<MatchesViewResponse>
 
 }

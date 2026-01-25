@@ -16,7 +16,8 @@ fun MainAppWithBottomNav(authViewModel: AuthViewModel) {
     val navController = rememberNavController()
     val matchesViewModel: MatchesViewModel = hiltViewModel()
 
-    val hasNewMatch by matchesViewModel.hasNewMatch.collectAsState()
+    val state by matchesViewModel.uiState.collectAsState()
+    val hasNewMatch = state.hasNewMatch
 
     Scaffold(
         bottomBar = {
