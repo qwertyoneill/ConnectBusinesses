@@ -115,6 +115,7 @@ class AuthViewModel @Inject constructor(
         _password.value = ""
         _loginError.value = ""
     }
+
     fun register(
         firstName: String,
         lastName: String,
@@ -125,9 +126,8 @@ class AuthViewModel @Inject constructor(
     ) {
         viewModelScope.launch {
 
-            if (_isLoading.value) return@launch   // evita cliques duplos
+            if (_isLoading.value) return@launch
 
-            // ⭐ VALIDAÇÕES
             if (firstName.isBlank() || lastName.isBlank()) {
                 onError("Preenche o nome completo.")
                 return@launch
@@ -187,4 +187,8 @@ class AuthViewModel @Inject constructor(
         }
     }
 
+    fun onGoogleLoginError(message: String) {
+        _loginError.value = message
+        _isLoading.value = false
+    }
 }

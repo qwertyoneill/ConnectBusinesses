@@ -83,11 +83,6 @@ class DirectusRepository @Inject constructor(
         if (response.isSuccessful) response.body() else null
     } catch (e: Exception) { null }
 
-    suspend fun refreshToken(refreshToken: String): String? = try {
-        api.refreshToken(mapOf("refresh_token" to refreshToken))
-            .body()?.data?.access_token
-    } catch (e: Exception) { null }
-
     suspend fun registerUser(
         firstName: String,
         lastName: String,

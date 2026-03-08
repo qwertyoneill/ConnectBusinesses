@@ -20,37 +20,48 @@ class MatchesViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(MatchesUiState())
     val uiState = _uiState.asStateFlow()
 
-    fun loadMatches() {
+    init {
+        // Auto-carrega assim que o token existir (e evita "token inexistente" por timing)
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true, error = null) }
-
-            val token = dataStore.getAccessToken()
-            if (token == null) {
-                _uiState.update {
-                    it.copy(isLoading = false, error = "Token inexistente")
+            dataStore.token.collect { token ->
+                if (!token.isNullOrBlank()) {
+                    loadMatchesWithToken(token)
                 }
+            }
+        }
+    }
+
+    fun loadMatches() {
+        // Mantém isto para "refresh manual" caso queiras
+        viewModelScope.launch {
+            val token = dataStore.getAccessToken()
+            if (token.isNullOrBlank()) {
+                _uiState.update { it.copy(isLoading = false, error = "Inicia sessão para ver os matches.") }
                 return@launch
             }
-
-            repository.fetchMatches(token)
-                .onSuccess { matches ->
-                    _uiState.update {
-                        it.copy(
-                            isLoading = false,
-                            items = matches,
-                            hasNewMatch = matches.isNotEmpty()
-                        )
-                    }
-                }
-                .onFailure { error ->
-                    _uiState.update {
-                        it.copy(
-                            isLoading = false,
-                            error = error.message ?: "Erro ao carregar matches"
-                        )
-                    }
-                }
+            loadMatchesWithToken(token)
         }
+    }
+
+    private suspend fun loadMatchesWithToken(token: String) {
+        _uiState.update { it.copy(isLoading = true, error = null) }
+
+        repository.fetchMatches(token)
+            .onSuccess { matches ->
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        items = matches,
+                        hasNewMatch = matches.isNotEmpty(),
+                        error = null
+                    )
+                }
+            }
+            .onFailure { e ->
+                _uiState.update {
+                    it.copy(isLoading = false, error = e.message ?: "Erro ao carregar matches")
+                }
+            }
     }
 
     fun markMatchesAsSeen() {

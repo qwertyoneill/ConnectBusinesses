@@ -1,6 +1,8 @@
 package com.tiagovaz.connectbusinesses.data.network.auth
 
-data class FirebaseLoginRequest(val idToken: String)
+data class FirebaseLoginRequest(
+    val idToken: String
+)
 
 data class FirebaseLoginResponse(
     val ok: Boolean,

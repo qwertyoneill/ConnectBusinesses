@@ -1,6 +1,5 @@
 package com.tiagovaz.connectbusinesses.ui.login
 
-import android.util.Log
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.runtime.LaunchedEffect
@@ -39,7 +38,7 @@ import com.tiagovaz.connectbusinesses.viewmodel.AuthViewModel
 @Composable
 fun LoginScreen(
     onLoginSuccess: () -> Unit,
-    onCreateAccount: () -> Unit,   // 👈 ADICIONADO AQUI
+    onCreateAccount: () -> Unit,
     viewModel: AuthViewModel = hiltViewModel()
 ) {
     val isLoggedIn by viewModel.isLoggedIn.collectAsState()
@@ -52,7 +51,6 @@ fun LoginScreen(
 
     Box(modifier = Modifier.fillMaxSize()) {
 
-        // BACKGROUND
         Image(
             painter = painterResource(id = R.drawable.login_background),
             contentDescription = null,
@@ -67,7 +65,6 @@ fun LoginScreen(
                 .blur(25.dp)
         )
 
-        // CONTENT
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -81,7 +78,9 @@ fun LoginScreen(
             Image(
                 painter = painterResource(id = R.drawable.app_logo),
                 contentDescription = "Logo",
-                modifier = Modifier.size(160.dp).padding(bottom = 32.dp)
+                modifier = Modifier
+                    .size(160.dp)
+                    .padding(bottom = 32.dp)
             )
 
             Box(
@@ -99,7 +98,7 @@ fun LoginScreen(
                 LoginFields(
                     viewModel = viewModel,
                     focusManager = focusManager,
-                    onCreateAccount = onCreateAccount // 👈 PASSADO AQUI
+                    onCreateAccount = onCreateAccount
                 )
             }
         }
@@ -110,7 +109,7 @@ fun LoginScreen(
 fun LoginFields(
     viewModel: AuthViewModel,
     focusManager: FocusManager,
-    onCreateAccount: () -> Unit // 👈 ADICIONADO AQUI
+    onCreateAccount: () -> Unit
 ) {
     val email by viewModel.email.collectAsState()
     val password by viewModel.password.collectAsState()
@@ -160,7 +159,11 @@ fun LoginFields(
                 }
             },
             singleLine = true,
-            visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+            visualTransformation = if (passwordVisible) {
+                VisualTransformation.None
+            } else {
+                PasswordVisualTransformation()
+            },
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = Color.White,
                 unfocusedBorderColor = Color.White.copy(alpha = 0.5f),
@@ -185,10 +188,14 @@ fun LoginFields(
                 containerColor = Color(0xFF007FFF)
             )
         ) {
-            if (isLoading)
-                CircularProgressIndicator(color = Color.White, modifier = Modifier.size(22.dp))
-            else
+            if (isLoading) {
+                CircularProgressIndicator(
+                    color = Color.White,
+                    modifier = Modifier.size(22.dp)
+                )
+            } else {
                 Text("Entrar", color = Color.White, fontWeight = FontWeight.Bold)
+            }
         }
 
         if (loginError.isNotEmpty()) {
@@ -218,11 +225,13 @@ fun LoginFields(
                 thickness = 1.dp
             )
         }
+
         Spacer(Modifier.height(16.dp))
+
         val context = LocalContext.current
         val googleAuth = remember { FirebaseGoogleAuth(context) }
         val scope = rememberCoroutineScope()
-        // Ícones sociais
+
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceEvenly
@@ -231,10 +240,13 @@ fun LoginFields(
                 onClick = {
                     scope.launch {
                         googleAuth.signInWithGoogle(
-                            onSuccess = { email, firstName, lastName, firebaseToken ->
+                            onSuccess = { _, _, _, firebaseToken ->
                                 viewModel.loginWithFirebaseIdToken(firebaseToken)
                             },
-                            onError = {
+                            onError = { error ->
+                                viewModel.onGoogleLoginError(
+                                    error.message ?: "Erro no login Google"
+                                )
                             }
                         )
                     }
@@ -256,6 +268,7 @@ fun LoginFields(
                     modifier = Modifier.size(40.dp)
                 )
             }
+
             IconButton(onClick = { /* TODO login Microsoft */ }) {
                 Icon(
                     painter = painterResource(R.drawable.ic_microsoft),
@@ -279,7 +292,7 @@ fun LoginFields(
 
             Spacer(Modifier.width(8.dp))
 
-            TextButton(onClick = { onCreateAccount() }) { // 👈 AGORA FUNCIONA
+            TextButton(onClick = { onCreateAccount() }) {
                 Text(
                     "Criar conta",
                     color = Color(0xFF42A5F5),
