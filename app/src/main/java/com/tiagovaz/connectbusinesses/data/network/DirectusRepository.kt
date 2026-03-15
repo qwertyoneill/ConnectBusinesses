@@ -9,28 +9,6 @@ import javax.inject.Inject
 class DirectusRepository @Inject constructor(
     private val api: DirectusService
 ) {
-
-    suspend fun fetchLeads(token: String): List<LeadItem> = try {
-        api.getLeads("Bearer $token").body()?.data ?: emptyList()
-    } catch (e: Exception) {
-        emptyList()
-    }
-
-    suspend fun fetchLeadsUnswiped(token: String): List<LeadItem> = try {
-        val leads = fetchLeads(token)
-
-        // swipes já feitos pelo utilizador (policy resolve segurança)
-        val swipedIds = api.getMySwipes("Bearer $token")
-            .body()?.data
-            ?.map { it.lead }
-            ?.toSet()
-            ?: emptySet()
-
-        leads.filterNot { it.id in swipedIds }
-    } catch (e: Exception) {
-        emptyList()
-    }
-
     suspend fun sendSwipe(
         token: String,
         leadId: Int,
@@ -46,7 +24,6 @@ class DirectusRepository @Inject constructor(
     } catch (e: Exception) {
         false
     }
-
     suspend fun fetchMatches(token: String): Result<List<MatchViewItem>> {
         return try {
             val response = api.getMyMatches("Bearer $token")
@@ -98,4 +75,23 @@ class DirectusRepository @Inject constructor(
         val response = api.firebaseLogin(FirebaseLoginRequest(idToken))
         if (response.isSuccessful) response.body() else null
     } catch (e: Exception) { null }
+
+    suspend fun fetchFeedLeads(token: String, limit: Int = 20): List<LeadItem> = try {
+        val response = api.getFeedLeads("Bearer $token", limit)
+
+        android.util.Log.d("FEED_RESULT", "CODE: ${response.code()}")
+
+        if (response.isSuccessful) {
+            val data = response.body()?.data ?: emptyList()
+            android.util.Log.d("FEED_RESULT", "LEADS SIZE: ${data.size}")
+            data
+        } else {
+            android.util.Log.d("FEED_RESULT", "ERROR BODY: ${response.errorBody()?.string()}")
+            emptyList()
+        }
+    } catch (e: Exception) {
+        android.util.Log.e("FEED_RESULT", "EXCEPTION: ${e.message}", e)
+        emptyList()
+    }
+
 }

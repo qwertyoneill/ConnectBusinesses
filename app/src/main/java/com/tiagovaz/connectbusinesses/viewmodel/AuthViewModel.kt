@@ -1,5 +1,6 @@
 package com.tiagovaz.connectbusinesses.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.tiagovaz.connectbusinesses.data.network.DirectusRepository
@@ -78,16 +79,32 @@ class AuthViewModel @Inject constructor(
     fun checkLoginStatus() {
         viewModelScope.launch {
             val savedToken = dataStoreManager.token.first()
+
+            Log.d("AUTH_COMPARE", "TOKEN DO DATASTORE: ${savedToken?.take(40)}")
+
             if (!savedToken.isNullOrEmpty()) {
                 val profile = repository.getMe(savedToken)
+
+                Log.d("AUTH_COMPARE", "PROFILE OK? ${profile != null}")
+
                 if (profile != null) {
                     _token.value = savedToken
                     _isLoggedIn.value = true
                     _userName.value = dataStoreManager.userName.first()
+
+                    Log.d("AUTH_COMPARE", "TOKEN RESTAURADO PARA _token: ${savedToken.take(40)}")
                 } else {
                     dataStoreManager.clearAll()
                     _isLoggedIn.value = false
+                    _token.value = null
+
+                    Log.d("AUTH_COMPARE", "TOKEN INVÁLIDO - DataStore limpo")
                 }
+            } else {
+                _isLoggedIn.value = false
+                _token.value = null
+
+                Log.d("AUTH_COMPARE", "SEM TOKEN NO DATASTORE")
             }
         }
     }
@@ -168,7 +185,10 @@ class AuthViewModel @Inject constructor(
 
             val resp = repository.firebaseLogin(firebaseIdToken)
 
-            val directusToken = resp?.token
+            Log.d("AUTH_COMPARE", "RESP TOKEN: ${resp?.access_token?.take(40)}")
+            Log.d("AUTH_COMPARE", "RESP USER EMAIL: ${resp?.user?.email}")
+
+            val directusToken = resp?.access_token
             val firstName = resp?.user?.first_name.orEmpty()
 
             if (!directusToken.isNullOrBlank()) {
@@ -176,11 +196,16 @@ class AuthViewModel @Inject constructor(
                 dataStoreManager.saveUserName(firstName)
                 dataStoreManager.saveAuthMethod("firebase")
 
+                Log.d("AUTH_COMPARE", "TOKEN GUARDADO: ${directusToken.take(40)}")
+
                 _token.value = directusToken
                 _userName.value = firstName
                 _isLoggedIn.value = true
+
+                Log.d("AUTH_COMPARE", "TOKEN ATRIBUÍDO A _token: ${directusToken.take(40)}")
             } else {
                 _loginError.value = "Falha no login Google."
+                Log.d("AUTH_COMPARE", "LOGIN FIREBASE FALHOU - token nulo ou vazio")
             }
 
             _isLoading.value = false

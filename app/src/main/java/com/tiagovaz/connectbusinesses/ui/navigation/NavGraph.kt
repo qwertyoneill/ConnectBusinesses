@@ -7,7 +7,6 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.tiagovaz.connectbusinesses.ui.screens.*
 import com.tiagovaz.connectbusinesses.viewmodel.AuthViewModel
 
@@ -24,11 +23,14 @@ fun NavGraph(
     ) {
 
         composable(BottomNavItem.Home.route) {
-            HomeScreen(authViewModel)
+            HomeScreen(authViewModel = authViewModel)
         }
 
         composable(BottomNavItem.Leads.route) {
-            LeadsScreen(navController)
+            LeadsScreen(
+                navController = navController,
+                authViewModel = authViewModel
+            )
         }
 
         composable(BottomNavItem.Businesses.route) {
@@ -36,16 +38,19 @@ fun NavGraph(
         }
 
         composable(BottomNavItem.Profile.route) {
-            ProfileScreen(navController, authViewModel)
+            ProfileScreen(
+                navController = navController,
+                authViewModel = authViewModel
+            )
         }
 
         composable("leadDetails/{id}") { backStack ->
             val id = backStack.arguments?.getString("id")!!
             LeadDetailsScreen(id, navController)
         }
-        composable("matches") {
-            MatchesScreen(navController)
-        }
 
+        composable("matches") {
+            MatchesScreen(navController = navController)
+        }
     }
 }

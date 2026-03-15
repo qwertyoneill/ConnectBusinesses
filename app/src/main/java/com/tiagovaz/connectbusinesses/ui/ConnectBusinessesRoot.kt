@@ -28,26 +28,30 @@ fun ConnectBusinessesRoot(
                 },
                 onCreateAccount = {
                     navController.navigate("register")
-                }
+                },
+                viewModel = authViewModel
             )
         }
 
         composable("register") {
             RegisterScreen(
                 onRegisterSuccess = {
-                    navController.popBackStack() // volta ao login
+                    navController.navigate("main") {
+                        popUpTo("register") { inclusive = true }
+                        popUpTo("login") { inclusive = true }
+                    }
                 },
                 onBackToLogin = {
-                    navController.popBackStack() // também volta ao login
-                }
+                    navController.popBackStack()
+                },
+                authViewModel = authViewModel
             )
         }
 
-
         composable("main") {
-            MainAppWithBottomNav(authViewModel)
+            MainAppWithBottomNav(
+                authViewModel = authViewModel
+            )
         }
     }
 }
-
-

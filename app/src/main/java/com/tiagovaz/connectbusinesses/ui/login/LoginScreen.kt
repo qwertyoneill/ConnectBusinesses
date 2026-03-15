@@ -39,7 +39,7 @@ import com.tiagovaz.connectbusinesses.viewmodel.AuthViewModel
 fun LoginScreen(
     onLoginSuccess: () -> Unit,
     onCreateAccount: () -> Unit,
-    viewModel: AuthViewModel = hiltViewModel()
+    viewModel: AuthViewModel
 ) {
     val isLoggedIn by viewModel.isLoggedIn.collectAsState()
 

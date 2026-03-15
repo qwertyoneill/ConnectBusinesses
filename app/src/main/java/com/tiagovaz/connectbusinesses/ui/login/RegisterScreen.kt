@@ -34,7 +34,7 @@ import com.tiagovaz.connectbusinesses.viewmodel.AuthViewModel
 fun RegisterScreen(
     onRegisterSuccess: () -> Unit,
     onBackToLogin: () -> Unit,
-    authViewModel: AuthViewModel = hiltViewModel()
+    authViewModel: AuthViewModel
 ) {
     val focusManager = LocalFocusManager.current
     val context = LocalContext.current

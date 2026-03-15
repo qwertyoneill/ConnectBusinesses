@@ -12,17 +12,18 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.tiagovaz.connectbusinesses.viewmodel.AuthViewModel
 
 @Composable
 fun HomeScreen(
-    authViewModel: AuthViewModel = hiltViewModel()
+    authViewModel: AuthViewModel
 ) {
     val userName by authViewModel.userName.collectAsState()
 
     Column(
-        modifier = Modifier.fillMaxSize().padding(16.dp)
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
     ) {
         Text(
             text = "Olá, ${userName ?: "Utilizador"} 👋",
@@ -30,6 +31,5 @@ fun HomeScreen(
         )
         Spacer(modifier = Modifier.height(24.dp))
         Text("Bem-vindo ao ConnectBusinesses!")
-        // resto da UI...
     }
 }

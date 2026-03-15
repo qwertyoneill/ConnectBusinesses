@@ -1,5 +1,6 @@
 package com.tiagovaz.connectbusinesses.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.tiagovaz.connectbusinesses.data.network.DirectusRepository
@@ -22,9 +23,10 @@ class LeadsViewModel @Inject constructor(
     val isLoading = _isLoading.asStateFlow()
 
     fun fetchLeads(token: String) {
+        Log.d("FEED_DEBUG", "TOKEN: $token")
         viewModelScope.launch {
             _isLoading.value = true
-            _leads.value = repository.fetchLeadsUnswiped(token)
+            _leads.value = repository.fetchFeedLeads(token)
             _isLoading.value = false
         }
     }

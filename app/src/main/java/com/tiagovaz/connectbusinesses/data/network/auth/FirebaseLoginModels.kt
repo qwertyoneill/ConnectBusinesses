@@ -6,7 +6,7 @@ data class FirebaseLoginRequest(
 
 data class FirebaseLoginResponse(
     val ok: Boolean,
-    val token: String,
+    val access_token: String,
     val user: FirebaseLoginUser?
 )
 

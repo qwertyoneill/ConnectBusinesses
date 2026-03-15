@@ -20,22 +20,28 @@ import kotlin.collections.isNotEmpty
 @Composable
 fun LeadsScreen(
     navController: NavController,
-    leadsViewModel: LeadsViewModel = hiltViewModel(),
-    authViewModel: AuthViewModel = hiltViewModel()
+    authViewModel: AuthViewModel,
+    leadsViewModel: LeadsViewModel = hiltViewModel()
 ) {
-    val token by authViewModel.token.collectAsState(initial = null)
+    val token by authViewModel.token.collectAsState()
     val leads by leadsViewModel.leads.collectAsState(initial = emptyList())
     val isLoading by leadsViewModel.isLoading.collectAsState()
+    android.util.Log.d(
+        "AUTH_TOKEN",
+        "TOKEN NO SCREEN: ${token?.take(40)}"
+    )
 
-    // ⚡️ Buscar leads quando token disponível
+
     LaunchedEffect(token) {
-        token?.let { leadsViewModel.fetchLeads(it) }
+        android.util.Log.d("TOKEN_SCREEN", "TOKEN NO SCREEN: $token")
+        if (!token.isNullOrEmpty()) {
+            android.util.Log.d("TOKEN_SCREEN", "CHAMAR fetchLeads()")
+            leadsViewModel.fetchLeads(token!!)
+        }
     }
 
-    // 📱 Pegar dimensões do ecrã para adaptação automática
     val configuration = LocalConfiguration.current
     val screenHeight = configuration.screenHeightDp.dp
-    val screenWidth = configuration.screenWidthDp.dp
 
     Box(
         modifier = Modifier
@@ -49,7 +55,6 @@ fun LeadsScreen(
             }
 
             leads.isNotEmpty() -> {
-                // 💫 SwipeStack ocupa o ecrã todo — imagem fullscreen
                 SwipeStack(
                     items = leads,
                     onSwipeLeft = { lead ->
@@ -58,8 +63,7 @@ fun LeadsScreen(
                     onSwipeRight = { lead ->
                         token?.let { leadsViewModel.sendSwipe(it, lead.id, "like") }
                     }
-                )
-                { lead, isActive, shadowColor, borderColor ->
+                ) { lead, isActive, shadowColor, borderColor ->
                     LeadCard(
                         lead = lead,
                         modifier = Modifier
@@ -71,7 +75,6 @@ fun LeadsScreen(
                         borderColor = borderColor
                     )
                 }
-
             }
 
             else -> {

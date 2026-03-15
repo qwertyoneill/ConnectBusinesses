@@ -10,11 +10,6 @@ interface DirectusService {
     @POST("auth/login")
     suspend fun login(@Body request: LoginRequest): Response<LoginResponse>
 
-    @GET("items/leads")
-    suspend fun getLeads(
-        @Header("Authorization") token: String
-    ): Response<LeadsResponse>
-
     @GET("items/leads/{id}")
     suspend fun getLeadDetails(
         @Header("Authorization") token: String,
@@ -60,5 +55,11 @@ interface DirectusService {
     suspend fun getMyMatches(
         @Header("Authorization") token: String
     ): Response<MatchesViewResponse>
+
+    @GET("feed")
+    suspend fun getFeedLeads(
+        @Header("Authorization") token: String,
+        @Query("limit") limit: Int = 20
+    ): Response<LeadsResponse>
 
 }

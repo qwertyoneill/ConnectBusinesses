@@ -26,10 +26,10 @@ fun MainAppWithBottomNav(authViewModel: AuthViewModel) {
                 hasNewMatch = hasNewMatch
             )
         }
-    ) { innerPadding ->
+    ) { PaddingValues ->
         NavGraph(
             navController = navController,
-            paddingValues = innerPadding,
+            paddingValues = PaddingValues,
             authViewModel = authViewModel
         )
     }

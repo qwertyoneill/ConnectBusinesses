@@ -19,7 +19,19 @@ data class LeadItem(
     val need: String?,
 
     @SerializedName("imageUrl")
-    val imageUrl: String?
+    val imageUrl: String?,
+
+    @SerializedName("type")
+    val type: String?,
+
+    @SerializedName("owner")
+    val owner: String?,
+
+    @SerializedName("created_at")
+    val createdAt: String?,
+
+    @SerializedName("relevance_score")
+    val relevanceScore: Int?
 )
 data class LeadDetailsResponse(
     val data: LeadItem?
