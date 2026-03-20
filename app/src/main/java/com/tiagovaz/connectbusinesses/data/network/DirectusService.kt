@@ -51,8 +51,8 @@ interface DirectusService {
         @Body body: SwipeCreateRequest
     ): Response<SwipeCreateResponse>
 
-    @GET("items/matches_view")
-    suspend fun getMyMatches(
+    @GET("matches")
+    suspend fun getMatches(
         @Header("Authorization") token: String
     ): Response<MatchesViewResponse>
 
@@ -61,5 +61,29 @@ interface DirectusService {
         @Header("Authorization") token: String,
         @Query("limit") limit: Int = 20
     ): Response<LeadsResponse>
+
+    @GET("chat/conversations")
+    suspend fun getConversations(
+        @Header("Authorization") token: String
+    ): Response<ConversationsResponse>
+
+    @GET("chat/conversations/{id}/messages")
+    suspend fun getConversationMessages(
+        @Header("Authorization") token: String,
+        @Path("id") conversationId: Int
+    ): Response<ConversationMessagesResponse>
+
+    @POST("chat/conversations/{id}/messages")
+    suspend fun sendConversationMessage(
+        @Header("Authorization") token: String,
+        @Path("id") conversationId: Int,
+        @Body body: SendMessageRequest
+    ): Response<ConversationMessageItem>
+
+    @POST("chat/conversations/{id}/read")
+    suspend fun markConversationRead(
+        @Header("Authorization") token: String,
+        @Path("id") conversationId: Int
+    ): Response<MarkConversationReadResponse>
 
 }

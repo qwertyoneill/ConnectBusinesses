@@ -33,10 +33,13 @@ class LeadsViewModel @Inject constructor(
 
     fun sendSwipe(token: String, leadId: Int, direction: String) {
         viewModelScope.launch {
+            val previous = _leads.value
+            _leads.value = previous.filterNot { it.id == leadId }
+
             val ok = repository.sendSwipe(token, leadId, direction)
-            if (ok) {
-                // remove da stack localmente (UX instantânea)
-                _leads.value = _leads.value.filterNot { it.id == leadId }
+
+            if (!ok) {
+                _leads.value = previous
             }
         }
     }

@@ -26,16 +26,13 @@ class DirectusRepository @Inject constructor(
     }
     suspend fun fetchMatches(token: String): Result<List<MatchViewItem>> {
         return try {
-            val response = api.getMyMatches("Bearer $token")
+            val response = api.getMatches("Bearer $token")
 
             if (response.isSuccessful) {
-                val matches = response.body()?.data ?: emptyList()
-                Result.success(matches)
+                Result.success(response.body()?.data ?: emptyList())
             } else {
                 Result.failure(
-                    Exception(
-                        "Erro ${response.code()}: ${response.errorBody()?.string()}"
-                    )
+                    Exception("Erro ${response.code()}: ${response.errorBody()?.string()}")
                 )
             }
         } catch (e: Exception) {
@@ -92,6 +89,85 @@ class DirectusRepository @Inject constructor(
     } catch (e: Exception) {
         android.util.Log.e("FEED_RESULT", "EXCEPTION: ${e.message}", e)
         emptyList()
+    }
+
+    suspend fun fetchConversations(token: String): Result<List<ConversationItem>> {
+        return try {
+            val response = api.getConversations("Bearer $token")
+
+            if (response.isSuccessful) {
+                Result.success(response.body()?.data ?: emptyList())
+            } else {
+                Result.failure(
+                    Exception("Erro ${response.code()}: ${response.errorBody()?.string()}")
+                )
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun fetchConversationMessages(
+        token: String,
+        conversationId: Int
+    ): Result<List<ConversationMessageItem>> {
+        return try {
+            val response = api.getConversationMessages("Bearer $token", conversationId)
+
+            if (response.isSuccessful) {
+                Result.success(response.body()?.data ?: emptyList())
+            } else {
+                Result.failure(
+                    Exception("Erro ${response.code()}: ${response.errorBody()?.string()}")
+                )
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun sendConversationMessage(
+        token: String,
+        conversationId: Int,
+        message: String
+    ): Result<ConversationMessageItem> {
+        return try {
+            val response = api.sendConversationMessage(
+                token = "Bearer $token",
+                conversationId = conversationId,
+                body = SendMessageRequest(message)
+            )
+
+            if (response.isSuccessful) {
+                response.body()?.let { Result.success(it) }
+                    ?: Result.failure(Exception("Resposta vazia"))
+            } else {
+                Result.failure(
+                    Exception("Erro ${response.code()}: ${response.errorBody()?.string()}")
+                )
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun markConversationAsRead(
+        token: String,
+        conversationId: Int
+    ): Result<Boolean> {
+        return try {
+            val response = api.markConversationRead("Bearer $token", conversationId)
+
+            if (response.isSuccessful) {
+                Result.success(response.body()?.success == true)
+            } else {
+                Result.failure(
+                    Exception("Erro ${response.code()}: ${response.errorBody()?.string()}")
+                )
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 
 }

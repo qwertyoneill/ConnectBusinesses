@@ -12,7 +12,7 @@ fun BottomNavBar(navController: NavController,
         BottomNavItem.Home,
         BottomNavItem.Leads,
         BottomNavItem.Matches,
-        BottomNavItem.Businesses,
+        BottomNavItem.Conversations,
         BottomNavItem.Profile
     )
 

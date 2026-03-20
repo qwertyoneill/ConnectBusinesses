@@ -67,8 +67,8 @@ fun MatchesScreen(
                     MatchCard(
                         match = match,
                         onClick = {
-                            match.lead_id?.let { leadId ->
-                                navController.navigate("leadDetails/$leadId")
+                            match.match_id?.let { matchId ->
+                                navController.navigate("conversations")
                             }
                         }
                     )

@@ -33,10 +33,9 @@ fun NavGraph(
             )
         }
 
-        composable(BottomNavItem.Businesses.route) {
-            BusinessesScreen()
+        composable("conversations") {
+            ConversationsScreen(navController = navController)
         }
-
         composable(BottomNavItem.Profile.route) {
             ProfileScreen(
                 navController = navController,
@@ -51,6 +50,21 @@ fun NavGraph(
 
         composable("matches") {
             MatchesScreen(navController = navController)
+        }
+        composable("conversations") {
+            ConversationsScreen(navController = navController)
+        }
+
+        composable("chat/{conversationId}/{firstName}/{lastName}") { backStack ->
+            val conversationId = backStack.arguments?.getString("conversationId")?.toIntOrNull() ?: 0
+            val firstName = backStack.arguments?.getString("firstName").orEmpty()
+            val lastName = backStack.arguments?.getString("lastName").orEmpty()
+            val fullName = listOf(firstName, lastName).filter { it.isNotBlank() }.joinToString(" ")
+
+            ChatScreen(
+                conversationId = conversationId,
+                otherUserName = fullName
+            )
         }
     }
 }
