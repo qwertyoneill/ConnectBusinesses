@@ -40,8 +40,6 @@ fun ChatScreen(
     }
 
     Column(modifier = Modifier.fillMaxSize()) {
-
-        // Nome do utilizador
         Text(
             text = if (otherUserName.isBlank()) "Chat" else otherUserName,
             style = MaterialTheme.typography.titleLarge,
@@ -49,7 +47,6 @@ fun ChatScreen(
         )
 
         when {
-
             state.isLoading -> {
                 Box(
                     modifier = Modifier
@@ -76,7 +73,6 @@ fun ChatScreen(
             }
 
             else -> {
-
                 LazyColumn(
                     modifier = Modifier
                         .weight(1f)
@@ -84,19 +80,13 @@ fun ChatScreen(
                         .padding(horizontal = 16.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-
                     items(state.messages) { msg ->
-
                         Card(
                             modifier = Modifier.fillMaxWidth(),
                             shape = RoundedCornerShape(14.dp),
                             elevation = CardDefaults.cardElevation(2.dp)
                         ) {
-
-                            Column(
-                                modifier = Modifier.padding(12.dp)
-                            ) {
-
+                            Column(modifier = Modifier.padding(12.dp)) {
                                 Text(
                                     text = msg.message_text ?: "",
                                     style = MaterialTheme.typography.bodyMedium
@@ -122,14 +112,11 @@ fun ChatScreen(
                 .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-
             OutlinedTextField(
                 value = messageText,
                 onValueChange = { messageText = it },
                 modifier = Modifier.weight(1f),
-                placeholder = {
-                    Text("Escreve uma mensagem...")
-                }
+                placeholder = { Text("Escreve uma mensagem...") }
             )
 
             Spacer(modifier = Modifier.padding(4.dp))
