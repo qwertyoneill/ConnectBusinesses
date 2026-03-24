@@ -1,35 +1,41 @@
 package com.tiagovaz.connectbusinesses.ui
 
-import androidx.compose.material3.Scaffold
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.compose.ui.unit.dp
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.compose.material3.Scaffold
 import com.tiagovaz.connectbusinesses.ui.navigation.BottomNavBar
 import com.tiagovaz.connectbusinesses.ui.navigation.NavGraph
 import com.tiagovaz.connectbusinesses.viewmodel.AuthViewModel
-import com.tiagovaz.connectbusinesses.viewmodel.MatchesViewModel
 
 @Composable
-fun MainAppWithBottomNav(authViewModel: AuthViewModel) {
+fun MainAppWithBottomNav(
+    authViewModel: AuthViewModel,
+    hasNewMatch: Boolean
+) {
     val navController = rememberNavController()
-    val matchesViewModel: MatchesViewModel = hiltViewModel()
 
-    val state by matchesViewModel.uiState.collectAsState()
-    val hasNewMatch = state.hasNewMatch
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route ?: ""
+
+    val showBottomBar = !currentRoute.startsWith("chat/")
 
     Scaffold(
         bottomBar = {
-            BottomNavBar(
-                navController = navController,
-                hasNewMatch = hasNewMatch
-            )
+            if (showBottomBar) {
+                BottomNavBar(
+                    navController = navController,
+                    hasNewMatch = hasNewMatch
+                )
+            }
         }
-    ) { PaddingValues ->
+    ) { innerPadding ->
         NavGraph(
             navController = navController,
-            paddingValues = PaddingValues,
+            paddingValues = if (showBottomBar) innerPadding else PaddingValues(0.dp),
             authViewModel = authViewModel
         )
     }

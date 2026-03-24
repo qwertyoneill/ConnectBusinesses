@@ -50,7 +50,8 @@ fun ConnectBusinessesRoot(
 
         composable("main") {
             MainAppWithBottomNav(
-                authViewModel = authViewModel
+                authViewModel = authViewModel,
+                hasNewMatch = false
             )
         }
     }

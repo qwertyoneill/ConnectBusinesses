@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -33,9 +34,6 @@ fun NavGraph(
             )
         }
 
-        composable("conversations") {
-            ConversationsScreen(navController = navController)
-        }
         composable(BottomNavItem.Profile.route) {
             ProfileScreen(
                 navController = navController,
@@ -48,10 +46,11 @@ fun NavGraph(
             LeadDetailsScreen(id, navController)
         }
 
-        composable("matches") {
+        composable(BottomNavItem.Matches.route) {
             MatchesScreen(navController = navController)
         }
-        composable("conversations") {
+
+        composable(BottomNavItem.Conversations.route) {
             ConversationsScreen(navController = navController)
         }
 
@@ -59,7 +58,9 @@ fun NavGraph(
             val conversationId = backStack.arguments?.getString("conversationId")?.toIntOrNull() ?: 0
             val firstName = backStack.arguments?.getString("firstName").orEmpty()
             val lastName = backStack.arguments?.getString("lastName").orEmpty()
-            val fullName = listOf(firstName, lastName).filter { it.isNotBlank() }.joinToString(" ")
+            val fullName = listOf(firstName, lastName)
+                .filter { it.isNotBlank() }
+                .joinToString(" ")
 
             ChatScreen(
                 conversationId = conversationId,
