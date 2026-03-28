@@ -40,6 +40,10 @@ data class SendMessageRequest(
     val message: String
 )
 
+data class SendMessageResponse(
+    val data: ConversationMessageItem
+)
+
 data class MarkConversationReadResponse(
     val success: Boolean,
     val conversation_id: Int

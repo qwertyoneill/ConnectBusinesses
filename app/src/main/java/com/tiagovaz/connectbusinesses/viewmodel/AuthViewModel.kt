@@ -118,11 +118,9 @@ class AuthViewModel @Inject constructor(
             clearLoginFields()
         }
     }
-
     fun onEmailChange(newEmail: String) {
         _email.value = newEmail
     }
-
     fun onPasswordChange(newPassword: String) {
         _password.value = newPassword
     }
@@ -132,7 +130,6 @@ class AuthViewModel @Inject constructor(
         _password.value = ""
         _loginError.value = ""
     }
-
     fun register(
         firstName: String,
         lastName: String,
@@ -177,7 +174,6 @@ class AuthViewModel @Inject constructor(
             }
         }
     }
-
     fun loginWithFirebaseIdToken(firebaseIdToken: String) {
         viewModelScope.launch {
             _isLoading.value = true
@@ -211,7 +207,6 @@ class AuthViewModel @Inject constructor(
             _isLoading.value = false
         }
     }
-
     fun onGoogleLoginError(message: String) {
         _loginError.value = message
         _isLoading.value = false

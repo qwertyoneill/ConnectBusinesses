@@ -78,7 +78,7 @@ interface DirectusService {
         @Header("Authorization") token: String,
         @Path("id") conversationId: Int,
         @Body body: SendMessageRequest
-    ): Response<ConversationMessageItem>
+    ): Response<SendMessageResponse>
 
     @POST("chat/conversations/{id}/read")
     suspend fun markConversationRead(

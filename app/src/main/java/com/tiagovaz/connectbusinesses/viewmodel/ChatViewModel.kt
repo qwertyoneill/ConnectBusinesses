@@ -64,19 +64,31 @@ class ChatViewModel @Inject constructor(
         if (trimmed.isBlank()) return
 
         viewModelScope.launch {
-            val token = dataStore.getAccessToken() ?: return@launch
+            val token = dataStore.getAccessToken()
+
+            if (token.isNullOrBlank()) {
+                _uiState.update {
+                    it.copy(
+                        sending = false,
+                        error = "Inicia sessão para enviar mensagens."
+                    )
+                }
+                return@launch
+            }
 
             _uiState.update { it.copy(sending = true, error = null) }
 
             repository.sendConversationMessage(token, conversationId, trimmed)
-                .onSuccess { sentMessage ->
+                .onSuccess {
+                    // evita o balão vazio: recarrega a conversa do servidor
+                    loadMessages(conversationId)
+
                     _uiState.update {
                         it.copy(
                             sending = false,
-                            messages = it.messages + sentMessage
+                            error = null
                         )
                     }
-                    repository.markConversationAsRead(token, conversationId)
                 }
                 .onFailure { e ->
                     _uiState.update {

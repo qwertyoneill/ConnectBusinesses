@@ -139,8 +139,13 @@ class DirectusRepository @Inject constructor(
             )
 
             if (response.isSuccessful) {
-                response.body()?.let { Result.success(it) }
-                    ?: Result.failure(Exception("Resposta vazia"))
+                val responseBody = response.body()
+
+                if (responseBody?.data != null) {
+                    Result.success(responseBody.data)
+                } else {
+                    Result.failure(Exception("Resposta vazia"))
+                }
             } else {
                 Result.failure(
                     Exception("Erro ${response.code()}: ${response.errorBody()?.string()}")
