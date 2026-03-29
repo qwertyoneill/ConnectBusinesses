@@ -29,7 +29,7 @@ fun NavGraph(
     ) {
 
         composable(BottomNavItem.Home.route) {
-            HomeScreen(authViewModel = authViewModel)
+            HomeScreen(navController = navController)
         }
 
         composable(BottomNavItem.Leads.route) {
