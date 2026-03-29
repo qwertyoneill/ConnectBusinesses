@@ -17,12 +17,13 @@ import com.tiagovaz.connectbusinesses.data.network.MatchViewItem
 @Composable
 fun MatchCard(
     match: MatchViewItem,
+    isOpening: Boolean = false,
     onClick: () -> Unit
 ) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onClick() },
+            .clickable(enabled = !isOpening) { onClick() },
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(6.dp)
     ) {
@@ -60,7 +61,17 @@ fun MatchCard(
                 )
             }
 
-            AssistChip(onClick = {}, label = { Text("Match") })
+            if (isOpening) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(20.dp),
+                    strokeWidth = 2.dp
+                )
+            } else {
+                AssistChip(
+                    onClick = onClick,
+                    label = { Text("Abrir chat") }
+                )
+            }
         }
     }
 }

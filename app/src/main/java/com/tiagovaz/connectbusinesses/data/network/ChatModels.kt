@@ -48,3 +48,11 @@ data class MarkConversationReadResponse(
     val success: Boolean,
     val conversation_id: Int
 )
+data class OpenConversationResponse(
+    val data: OpenConversationData
+)
+
+data class OpenConversationData(
+    val conversation_id: Int,
+    val created: Boolean
+)

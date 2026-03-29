@@ -1,9 +1,16 @@
 package com.tiagovaz.connectbusinesses.ui.screens
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.*
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -19,61 +26,82 @@ fun MatchesScreen(
     viewModel: MatchesViewModel = hiltViewModel()
 ) {
     val state by viewModel.uiState.collectAsState()
+    val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(Unit) {
         viewModel.loadMatches()
         viewModel.markMatchesAsSeen()
     }
 
-    when {
-        state.isLoading -> {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator()
-            }
+    LaunchedEffect(state.openChatError) {
+        state.openChatError?.let { error ->
+            snackbarHostState.showSnackbar(error)
+            viewModel.clearOpenChatError()
         }
+    }
 
-        state.error != null -> {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = state.error ?: "Erro desconhecido",
-                    color = MaterialTheme.colorScheme.error
-                )
+    Box(modifier = Modifier.fillMaxSize()) {
+        when {
+            state.isLoading -> {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
+                }
             }
-        }
 
-        state.items.isEmpty() -> {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Text("Ainda não tens matches 🤝")
-            }
-        }
-
-        else -> {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                items(state.items) { match ->
-                    MatchCard(
-                        match = match,
-                        onClick = {
-                            match.match_id?.let { matchId ->
-                                navController.navigate("conversations")
-                            }
-                        }
+            state.error != null -> {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = state.error ?: "Erro desconhecido",
+                        color = MaterialTheme.colorScheme.error
                     )
                 }
             }
+
+            state.items.isEmpty() -> {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text("Ainda não tens matches 🤝")
+                }
+            }
+
+            else -> {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    items(state.items) { match ->
+                        val matchId = match.match_id
+                        val isOpening = state.openingMatchId == matchId
+
+                        MatchCard(
+                            match = match,
+                            isOpening = isOpening,
+                            onClick = {
+                                if (matchId != null && !isOpening) {
+                                    viewModel.openMatchConversation(matchId) { conversationId ->
+                                        navController.navigate("chat/$conversationId")
+                                    }
+                                }
+                            }
+                        )
+                    }
+                }
+            }
         }
+
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier.align(Alignment.BottomCenter)
+        )
     }
 }

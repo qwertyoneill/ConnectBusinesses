@@ -174,5 +174,28 @@ class DirectusRepository @Inject constructor(
             Result.failure(e)
         }
     }
+    suspend fun openConversationFromMatch(
+        token: String,
+        matchId: Int
+    ): Result<Int> {
+        return try {
+            val response = api.openConversationFromMatch("Bearer $token", matchId)
+
+            if (response.isSuccessful) {
+                val conversationId = response.body()?.data?.conversation_id
+                if (conversationId != null) {
+                    Result.success(conversationId)
+                } else {
+                    Result.failure(Exception("Resposta sem conversation_id"))
+                }
+            } else {
+                Result.failure(
+                    Exception("Erro ${response.code()}: ${response.errorBody()?.string()}")
+                )
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 
 }

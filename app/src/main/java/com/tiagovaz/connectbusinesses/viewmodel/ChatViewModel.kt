@@ -5,6 +5,8 @@ import androidx.lifecycle.viewModelScope
 import com.tiagovaz.connectbusinesses.data.network.DirectusRepository
 import com.tiagovaz.connectbusinesses.data.storage.DataStoreManager
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -20,27 +22,40 @@ class ChatViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(ChatUiState())
     val uiState = _uiState.asStateFlow()
 
-    fun loadMessages(conversationId: Int) {
+    private var pollingJob: Job? = null
+    private var currentConversationId: Int? = null
+
+    fun openChat(conversationId: Int) {
+        currentConversationId = conversationId
+
         viewModelScope.launch {
             val token = dataStore.getAccessToken()
+            val userId = dataStore.getUserId()
 
             if (token.isNullOrBlank()) {
                 _uiState.update {
                     it.copy(
-                        isLoading = false,
+                        initialLoading = false,
                         error = "Inicia sessão para abrir o chat."
                     )
                 }
                 return@launch
             }
 
-            _uiState.update { it.copy(isLoading = true, error = null) }
+            _uiState.update {
+                it.copy(
+                    currentUserId = userId,
+                    initialLoading = true,
+                    error = null,
+                    sendError = null
+                )
+            }
 
             repository.fetchConversationMessages(token, conversationId)
                 .onSuccess { messages ->
                     _uiState.update {
                         it.copy(
-                            isLoading = false,
+                            initialLoading = false,
                             messages = messages,
                             error = null
                         )
@@ -51,7 +66,7 @@ class ChatViewModel @Inject constructor(
                 .onFailure { e ->
                     _uiState.update {
                         it.copy(
-                            isLoading = false,
+                            initialLoading = false,
                             error = e.message ?: "Erro ao carregar mensagens"
                         )
                     }
@@ -59,7 +74,40 @@ class ChatViewModel @Inject constructor(
         }
     }
 
-    fun sendMessage(conversationId: Int, text: String) {
+    fun refreshMessages() {
+        val conversationId = currentConversationId ?: return
+
+        viewModelScope.launch {
+            val token = dataStore.getAccessToken()
+            if (token.isNullOrBlank()) return@launch
+
+            _uiState.update { it.copy(refreshing = true) }
+
+            repository.fetchConversationMessages(token, conversationId)
+                .onSuccess { messages ->
+                    _uiState.update {
+                        it.copy(
+                            refreshing = false,
+                            messages = messages,
+                            error = null
+                        )
+                    }
+
+                    repository.markConversationAsRead(token, conversationId)
+                }
+                .onFailure { e ->
+                    _uiState.update {
+                        it.copy(
+                            refreshing = false,
+                            error = e.message ?: "Erro ao atualizar mensagens"
+                        )
+                    }
+                }
+        }
+    }
+
+    fun sendMessage(text: String) {
+        val conversationId = currentConversationId ?: return
         val trimmed = text.trim()
         if (trimmed.isBlank()) return
 
@@ -70,34 +118,48 @@ class ChatViewModel @Inject constructor(
                 _uiState.update {
                     it.copy(
                         sending = false,
-                        error = "Inicia sessão para enviar mensagens."
+                        sendError = "Inicia sessão para enviar mensagens."
                     )
                 }
                 return@launch
             }
 
-            _uiState.update { it.copy(sending = true, error = null) }
+            _uiState.update { it.copy(sending = true, sendError = null) }
 
             repository.sendConversationMessage(token, conversationId, trimmed)
                 .onSuccess {
-                    // evita o balão vazio: recarrega a conversa do servidor
-                    loadMessages(conversationId)
-
-                    _uiState.update {
-                        it.copy(
-                            sending = false,
-                            error = null
-                        )
-                    }
+                    _uiState.update { it.copy(sending = false) }
+                    refreshMessages()
                 }
                 .onFailure { e ->
                     _uiState.update {
                         it.copy(
                             sending = false,
-                            error = e.message ?: "Erro ao enviar mensagem"
+                            sendError = e.message ?: "Erro ao enviar mensagem"
                         )
                     }
                 }
         }
+    }
+
+    fun startPolling(intervalMs: Long = 3000L) {
+        if (pollingJob?.isActive == true) return
+
+        pollingJob = viewModelScope.launch {
+            while (true) {
+                delay(intervalMs)
+                refreshMessages()
+            }
+        }
+    }
+
+    fun stopPolling() {
+        pollingJob?.cancel()
+        pollingJob = null
+    }
+
+    override fun onCleared() {
+        stopPolling()
+        super.onCleared()
     }
 }

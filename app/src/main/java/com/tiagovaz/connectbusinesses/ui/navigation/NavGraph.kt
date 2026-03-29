@@ -4,11 +4,16 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.tiagovaz.connectbusinesses.ui.screens.*
+import com.tiagovaz.connectbusinesses.ui.screens.ChatScreen
+import com.tiagovaz.connectbusinesses.ui.screens.ConversationsScreen
+import com.tiagovaz.connectbusinesses.ui.screens.HomeScreen
+import com.tiagovaz.connectbusinesses.ui.screens.LeadsScreen
+import com.tiagovaz.connectbusinesses.ui.screens.MatchesScreen
+import com.tiagovaz.connectbusinesses.ui.screens.ProfileScreen
+import com.tiagovaz.connectbusinesses.ui.navigation.LeadDetailsScreen
 import com.tiagovaz.connectbusinesses.viewmodel.AuthViewModel
 
 @Composable
@@ -54,17 +59,12 @@ fun NavGraph(
             ConversationsScreen(navController = navController)
         }
 
-        composable("chat/{conversationId}/{firstName}/{lastName}") { backStack ->
+        composable("chat/{conversationId}") { backStack ->
             val conversationId = backStack.arguments?.getString("conversationId")?.toIntOrNull() ?: 0
-            val firstName = backStack.arguments?.getString("firstName").orEmpty()
-            val lastName = backStack.arguments?.getString("lastName").orEmpty()
-            val fullName = listOf(firstName, lastName)
-                .filter { it.isNotBlank() }
-                .joinToString(" ")
 
             ChatScreen(
                 conversationId = conversationId,
-                otherUserName = fullName
+                otherUserName = ""
             )
         }
     }

@@ -64,9 +64,11 @@ class AuthViewModel @Inject constructor(
                 val finalUserName = listOfNotNull(
                     user?.first_name,
                     user?.last_name
-                ).joinToString(" ")
+                ).joinToString(" ").ifBlank { "Utilizador" }
 
                 dataStoreManager.saveUserName(finalUserName)
+                user?.id?.let { dataStoreManager.saveUserId(it) }
+
                 _userName.value = finalUserName
             } else {
                 _loginError.value = "Email ou password incorretos"
@@ -90,7 +92,21 @@ class AuthViewModel @Inject constructor(
                 if (profile != null) {
                     _token.value = savedToken
                     _isLoggedIn.value = true
-                    _userName.value = dataStoreManager.userName.first()
+
+                    val profileUser = profile.data
+                    val restoredName = listOfNotNull(
+                        profileUser?.first_name,
+                        profileUser?.last_name
+                    ).joinToString(" ").ifBlank {
+                        dataStoreManager.userName.first().orEmpty()
+                    }
+
+                    _userName.value = restoredName.ifBlank { "Utilizador" }
+
+                    profileUser?.id?.let { dataStoreManager.saveUserId(it) }
+                    if (restoredName.isNotBlank()) {
+                        dataStoreManager.saveUserName(restoredName)
+                    }
 
                     Log.d("AUTH_COMPARE", "TOKEN RESTAURADO PARA _token: ${savedToken.take(40)}")
                 } else {
@@ -118,9 +134,11 @@ class AuthViewModel @Inject constructor(
             clearLoginFields()
         }
     }
+
     fun onEmailChange(newEmail: String) {
         _email.value = newEmail
     }
+
     fun onPasswordChange(newPassword: String) {
         _password.value = newPassword
     }
@@ -130,6 +148,7 @@ class AuthViewModel @Inject constructor(
         _password.value = ""
         _loginError.value = ""
     }
+
     fun register(
         firstName: String,
         lastName: String,
@@ -174,6 +193,7 @@ class AuthViewModel @Inject constructor(
             }
         }
     }
+
     fun loginWithFirebaseIdToken(firebaseIdToken: String) {
         viewModelScope.launch {
             _isLoading.value = true
@@ -186,16 +206,22 @@ class AuthViewModel @Inject constructor(
 
             val directusToken = resp?.access_token
             val firstName = resp?.user?.first_name.orEmpty()
+            val lastName = resp?.user?.last_name.orEmpty()
+            val finalUserName = listOfNotNull(firstName, lastName)
+                .filter { it.isNotBlank() }
+                .joinToString(" ")
+                .ifBlank { firstName.ifBlank { "Utilizador" } }
 
             if (!directusToken.isNullOrBlank()) {
                 dataStoreManager.saveToken(directusToken)
-                dataStoreManager.saveUserName(firstName)
+                dataStoreManager.saveUserName(finalUserName)
                 dataStoreManager.saveAuthMethod("firebase")
+                resp?.user?.id?.let { dataStoreManager.saveUserId(it) }
 
                 Log.d("AUTH_COMPARE", "TOKEN GUARDADO: ${directusToken.take(40)}")
 
                 _token.value = directusToken
-                _userName.value = firstName
+                _userName.value = finalUserName
                 _isLoggedIn.value = true
 
                 Log.d("AUTH_COMPARE", "TOKEN ATRIBUÍDO A _token: ${directusToken.take(40)}")
@@ -207,6 +233,7 @@ class AuthViewModel @Inject constructor(
             _isLoading.value = false
         }
     }
+
     fun onGoogleLoginError(message: String) {
         _loginError.value = message
         _isLoading.value = false

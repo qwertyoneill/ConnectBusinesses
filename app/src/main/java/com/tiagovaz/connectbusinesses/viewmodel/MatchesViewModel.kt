@@ -21,7 +21,6 @@ class MatchesViewModel @Inject constructor(
     val uiState = _uiState.asStateFlow()
 
     init {
-        // Auto-carrega assim que o token existir (e evita "token inexistente" por timing)
         viewModelScope.launch {
             dataStore.token.collect { token ->
                 if (!token.isNullOrBlank()) {
@@ -32,11 +31,15 @@ class MatchesViewModel @Inject constructor(
     }
 
     fun loadMatches() {
-        // Mantém isto para "refresh manual" caso queiras
         viewModelScope.launch {
             val token = dataStore.getAccessToken()
             if (token.isNullOrBlank()) {
-                _uiState.update { it.copy(isLoading = false, error = "Inicia sessão para ver os matches.") }
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        error = "Inicia sessão para ver os matches."
+                    )
+                }
                 return@launch
             }
             loadMatchesWithToken(token)
@@ -59,12 +62,52 @@ class MatchesViewModel @Inject constructor(
             }
             .onFailure { e ->
                 _uiState.update {
-                    it.copy(isLoading = false, error = e.message ?: "Erro ao carregar matches")
+                    it.copy(
+                        isLoading = false,
+                        error = e.message ?: "Erro ao carregar matches"
+                    )
                 }
             }
     }
 
+    fun openMatchConversation(matchId: Int, onOpened: (Int) -> Unit) {
+        viewModelScope.launch {
+            val token = dataStore.getAccessToken()
+
+            if (token.isNullOrBlank()) {
+                _uiState.update {
+                    it.copy(openChatError = "Inicia sessão para abrir o chat.")
+                }
+                return@launch
+            }
+
+            _uiState.update {
+                it.copy(openingMatchId = matchId, openChatError = null)
+            }
+
+            repository.openConversationFromMatch(token, matchId)
+                .onSuccess { conversationId ->
+                    _uiState.update {
+                        it.copy(openingMatchId = null, openChatError = null)
+                    }
+                    onOpened(conversationId)
+                }
+                .onFailure { e ->
+                    _uiState.update {
+                        it.copy(
+                            openingMatchId = null,
+                            openChatError = e.message ?: "Erro ao abrir conversa"
+                        )
+                    }
+                }
+        }
+    }
+
     fun markMatchesAsSeen() {
         _uiState.update { it.copy(hasNewMatch = false) }
+    }
+
+    fun clearOpenChatError() {
+        _uiState.update { it.copy(openChatError = null) }
     }
 }

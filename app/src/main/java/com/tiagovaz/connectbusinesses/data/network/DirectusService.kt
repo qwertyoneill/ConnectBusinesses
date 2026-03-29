@@ -86,4 +86,9 @@ interface DirectusService {
         @Path("id") conversationId: Int
     ): Response<MarkConversationReadResponse>
 
+    @POST("chat/matches/{matchId}/open")
+    suspend fun openConversationFromMatch(
+        @Header("Authorization") token: String,
+        @Path("matchId") matchId: Int
+    ): Response<OpenConversationResponse>
 }
