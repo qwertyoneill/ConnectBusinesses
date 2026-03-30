@@ -15,6 +15,7 @@ import com.tiagovaz.connectbusinesses.ui.screens.MatchesScreen
 import com.tiagovaz.connectbusinesses.ui.screens.ProfileScreen
 import com.tiagovaz.connectbusinesses.ui.navigation.LeadDetailsScreen
 import com.tiagovaz.connectbusinesses.viewmodel.AuthViewModel
+import com.tiagovaz.connectbusinesses.ui.screens.CreateLeadScreen
 
 @Composable
 fun NavGraph(
@@ -29,7 +30,9 @@ fun NavGraph(
     ) {
 
         composable(BottomNavItem.Home.route) {
-            HomeScreen(navController = navController)
+            HomeScreen(
+                navController = navController
+            )
         }
 
         composable(BottomNavItem.Leads.route) {
@@ -66,6 +69,9 @@ fun NavGraph(
                 conversationId = conversationId,
                 otherUserName = ""
             )
+        }
+        composable("createLead") {
+            CreateLeadScreen(navController = navController)
         }
     }
 }

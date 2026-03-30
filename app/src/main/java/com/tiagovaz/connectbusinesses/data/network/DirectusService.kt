@@ -91,4 +91,10 @@ interface DirectusService {
         @Header("Authorization") token: String,
         @Path("matchId") matchId: Int
     ): Response<OpenConversationResponse>
+
+    @POST("items/leads")
+    suspend fun createLead(
+        @Header("Authorization") token: String,
+        @Body body: CreateLeadRequest
+    ): Response<CreateLeadResponse>
 }

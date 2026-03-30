@@ -138,7 +138,7 @@ fun HomeScreen(
                         text = "Criar Lead",
                         icon = { Icon(Icons.Default.AddBusiness, contentDescription = null) },
                         onClick = {
-                            // depois ligamos ao ecrã CreateLead
+                            navController.navigate("createLead")
                         }
                     )
 
