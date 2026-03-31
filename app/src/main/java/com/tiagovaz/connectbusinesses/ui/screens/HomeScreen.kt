@@ -117,7 +117,7 @@ fun HomeScreen(
                         title = "Meus Leads",
                         value = state.myLeadsCount.toString(),
                         modifier = Modifier.weight(1f),
-                        onClick = { }
+                        onClick = { navController.navigate("myLeads") }
                     )
                 }
 

@@ -25,6 +25,7 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             val token = dataStore.getAccessToken()
             val userName = dataStore.userName.first().orEmpty().ifBlank { "Utilizador" }
+            val userId = dataStore.getUserId()
 
             if (token.isNullOrBlank()) {
                 _uiState.update {
@@ -48,9 +49,11 @@ class HomeViewModel @Inject constructor(
             val leads = repository.fetchFeedLeads(token)
             val matchesResult = repository.fetchMatches(token)
             val conversationsResult = repository.fetchConversations(token)
+            val myLeadsResult = if (!userId.isNullOrBlank()) repository.fetchMyLeads(token, userId) else Result.success(emptyList())
 
             val matches = matchesResult.getOrElse { emptyList() }
             val conversations = conversationsResult.getOrElse { emptyList() }
+            val myLeads = myLeadsResult.getOrElse { emptyList() }
 
             _uiState.update {
                 it.copy(
@@ -59,7 +62,7 @@ class HomeViewModel @Inject constructor(
                     availableLeadsCount = leads.size,
                     newMatchesCount = matches.size,
                     unreadConversationsCount = conversations.sumOf { convo -> convo.unread_count },
-                    myLeadsCount = 0,
+                    myLeadsCount = myLeads.size,
                     error = null
                 )
             }

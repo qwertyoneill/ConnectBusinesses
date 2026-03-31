@@ -97,4 +97,11 @@ interface DirectusService {
         @Header("Authorization") token: String,
         @Body body: CreateLeadRequest
     ): Response<CreateLeadResponse>
+
+    @GET("items/leads")
+    suspend fun getMyLeads(
+        @Header("Authorization") token: String,
+        @Query("filter[owner][_eq]") ownerId: String,
+        @Query("sort") sort: String = "-created_at"
+    ): Response<MyLeadsResponse>
 }

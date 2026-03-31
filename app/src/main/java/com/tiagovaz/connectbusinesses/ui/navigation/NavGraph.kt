@@ -16,6 +16,7 @@ import com.tiagovaz.connectbusinesses.ui.screens.ProfileScreen
 import com.tiagovaz.connectbusinesses.ui.navigation.LeadDetailsScreen
 import com.tiagovaz.connectbusinesses.viewmodel.AuthViewModel
 import com.tiagovaz.connectbusinesses.ui.screens.CreateLeadScreen
+import com.tiagovaz.connectbusinesses.ui.screens.MyLeadsScreen
 
 @Composable
 fun NavGraph(
@@ -72,6 +73,9 @@ fun NavGraph(
         }
         composable("createLead") {
             CreateLeadScreen(navController = navController)
+        }
+        composable("myLeads") {
+            MyLeadsScreen(navController = navController)
         }
     }
 }

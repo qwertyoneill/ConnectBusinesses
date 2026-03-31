@@ -231,4 +231,25 @@ class DirectusRepository @Inject constructor(
             Result.failure(e)
         }
     }
+    suspend fun fetchMyLeads(
+        token: String,
+        ownerId: String
+    ): Result<List<MyLeadItem>> {
+        return try {
+            val response = api.getMyLeads(
+                token = "Bearer $token",
+                ownerId = ownerId
+            )
+
+            if (response.isSuccessful) {
+                Result.success(response.body()?.data ?: emptyList())
+            } else {
+                Result.failure(
+                    Exception("Erro ${response.code()}: ${response.errorBody()?.string()}")
+                )
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 }
