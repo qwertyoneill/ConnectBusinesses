@@ -111,4 +111,10 @@ interface DirectusService {
         @Path("id") id: Int,
         @Body body: CreateLeadRequest
     ): Response<CreateLeadResponse>
+
+    @DELETE("items/leads/{id}")
+    suspend fun deleteLead(
+        @Header("Authorization") token: String,
+        @Path("id") id: Int
+    ): Response<Unit>
 }

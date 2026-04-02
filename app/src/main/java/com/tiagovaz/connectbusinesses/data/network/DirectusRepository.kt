@@ -288,4 +288,25 @@ class DirectusRepository @Inject constructor(
             Result.failure(e)
         }
     }
+    suspend fun deleteLead(
+        token: String,
+        id: Int
+    ): Result<Unit> {
+        return try {
+            val response = api.deleteLead(
+                token = "Bearer $token",
+                id = id
+            )
+            if (response.isSuccessful) {
+                Result.success(Unit)
+            } else {
+                Result.failure(
+                    Exception("Erro ${response.code()}: ${response.errorBody()?.string()}")
+                )
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
 }

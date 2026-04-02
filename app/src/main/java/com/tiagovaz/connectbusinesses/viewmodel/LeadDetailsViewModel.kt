@@ -14,8 +14,10 @@ import javax.inject.Inject
 
 data class LeadDetailsUiState(
     val isLoading: Boolean = false,
+    val isDeleting: Boolean = false,
     val lead: LeadItem? = null,
-    val error: String? = null
+    val error: String? = null,
+    val deleteSuccess: Boolean = false
 )
 
 @HiltViewModel
@@ -62,6 +64,46 @@ class LeadDetailsViewModel @Inject constructor(
                     )
                 }
             }
+        }
+    }
+    fun deleteLead() {
+        viewModelScope.launch {
+            val token = dataStore.getAccessToken()
+            val leadId = _uiState.value.lead?.id
+
+            if (token.isNullOrBlank()) {
+                _uiState.update {
+                    it.copy(error = "Inicia sessão para apagar a lead.")
+                }
+                return@launch
+            }
+
+            if (leadId == null) {
+                _uiState.update {
+                    it.copy(error = "Lead inválida.")
+                }
+                return@launch
+            }
+
+            _uiState.update { it.copy(isDeleting = true, error = null) }
+
+            repository.deleteLead(token, leadId)
+                .onSuccess {
+                    _uiState.update {
+                        it.copy(
+                            isDeleting = false,
+                            deleteSuccess = true
+                        )
+                    }
+                }
+                .onFailure { e ->
+                    _uiState.update {
+                        it.copy(
+                            isDeleting = false,
+                            error = e.message ?: "Erro ao apagar lead."
+                        )
+                    }
+                }
         }
     }
 }
