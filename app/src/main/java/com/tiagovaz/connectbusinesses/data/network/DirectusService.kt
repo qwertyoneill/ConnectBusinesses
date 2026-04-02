@@ -104,4 +104,11 @@ interface DirectusService {
         @Query("filter[owner][_eq]") ownerId: String,
         @Query("sort") sort: String = "-created_at"
     ): Response<MyLeadsResponse>
+
+    @PATCH("items/leads/{id}")
+    suspend fun updateLead(
+        @Header("Authorization") token: String,
+        @Path("id") id: Int,
+        @Body body: CreateLeadRequest
+    ): Response<CreateLeadResponse>
 }

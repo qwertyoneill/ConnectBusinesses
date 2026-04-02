@@ -102,6 +102,15 @@ fun LeadDetailsScreen(
                 Spacer(modifier = Modifier.height(24.dp))
 
                 Button(
+                    onClick = { navController.navigate("editLead/$id") },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Editar")
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Button(
                     onClick = { navController.popBackStack() },
                     modifier = Modifier.fillMaxWidth()
                 ) {

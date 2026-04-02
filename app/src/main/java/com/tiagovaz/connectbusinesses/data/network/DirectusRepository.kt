@@ -252,4 +252,40 @@ class DirectusRepository @Inject constructor(
             Result.failure(e)
         }
     }
+    suspend fun updateLead(
+        token: String,
+        id: Int,
+        name: String,
+        type: String,
+        description: String?,
+        location: String?
+    ): Result<CreatedLeadItem> {
+        return try {
+            val response = api.updateLead(
+                token = "Bearer $token",
+                id = id,
+                body = CreateLeadRequest(
+                    name = name.trim(),
+                    type = type.trim(),
+                    description = description?.trim()?.ifBlank { null },
+                    location = location?.trim()?.ifBlank { null }
+                )
+            )
+
+            if (response.isSuccessful) {
+                val data = response.body()?.data
+                if (data != null) {
+                    Result.success(data)
+                } else {
+                    Result.failure(Exception("Resposta vazia ao editar lead"))
+                }
+            } else {
+                Result.failure(
+                    Exception("Erro ${response.code()}: ${response.errorBody()?.string()}")
+                )
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 }

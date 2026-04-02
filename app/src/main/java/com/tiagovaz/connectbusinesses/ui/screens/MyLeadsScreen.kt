@@ -44,6 +44,10 @@ fun MyLeadsScreen(
         viewModel.loadMyLeads()
     }
 
+    LaunchedEffect(navController.currentBackStackEntry) {
+        viewModel.loadMyLeads()
+    }
+
     when {
         state.isLoading -> {
             Box(
