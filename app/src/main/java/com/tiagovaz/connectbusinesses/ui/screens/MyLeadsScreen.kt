@@ -86,7 +86,7 @@ fun MyLeadsScreen(
                     MyLeadCard(
                         lead = lead,
                         onClick = {
-                            // mais tarde podemos abrir detalhe/editar
+                            navController.navigate("leadDetails/${lead.id}")
                         }
                     )
                 }
