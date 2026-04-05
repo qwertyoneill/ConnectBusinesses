@@ -72,26 +72,14 @@ fun HomeScreen(
                     end = 16.dp,
                     bottom = 32.dp
                 ),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
+                verticalArrangement = Arrangement.spacedBy(14.dp)
             ) {
                 item {
-                    Text(
-                        text = "Olá, ${state.userName} 👋",
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontWeight = FontWeight.Bold
+                    HomeWelcomeCard(
+                        userName = state.userName,
+                        newMatchesCount = state.newMatchesCount,
+                        unreadConversationsCount = state.unreadConversationsCount
                     )
-                }
-
-                item {
-                    Text(
-                        text = "Tens ${state.newMatchesCount} matches e ${state.unreadConversationsCount} conversas por ler.",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-
-                item {
-                    Spacer(modifier = Modifier.height(8.dp))
                 }
 
                 item {
@@ -137,56 +125,7 @@ fun HomeScreen(
                 }
 
                 item {
-                    Spacer(modifier = Modifier.height(8.dp))
-                }
-
-                item {
-                    Text(
-                        text = "Ações rápidas",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                }
-
-                item {
-                    Column(
-                        verticalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        QuickActionButton(
-                            text = "Criar Lead",
-                            icon = { Icon(Icons.Default.AddBusiness, contentDescription = null) },
-                            onClick = { navController.navigate("createLead") }
-                        )
-
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(10.dp)
-                        ) {
-                            QuickSecondaryButton(
-                                text = "Ver Leads",
-                                icon = { Icon(Icons.Default.Search, contentDescription = null) },
-                                modifier = Modifier.weight(1f),
-                                onClick = { navController.navigate(BottomNavItem.Leads.route) }
-                            )
-
-                            QuickSecondaryButton(
-                                text = "Matches",
-                                icon = { Icon(Icons.Default.Favorite, contentDescription = null) },
-                                modifier = Modifier.weight(1f),
-                                onClick = { navController.navigate(BottomNavItem.Matches.route) }
-                            )
-                        }
-
-                        QuickSecondaryButton(
-                            text = "Abrir Conversas",
-                            icon = { Icon(Icons.Default.Chat, contentDescription = null) },
-                            modifier = Modifier.fillMaxWidth(),
-                            onClick = { navController.navigate(BottomNavItem.Conversations.route) }
-                        )
-                    }
-                }
-
-                item {
-                    Spacer(modifier = Modifier.height(8.dp))
+                    QuickActionsSection(navController = navController)
                 }
 
                 item {
@@ -199,6 +138,7 @@ fun HomeScreen(
 
                 item {
                     HomeActivityCard(
+                        emoji = "🔥",
                         title = "Novos matches",
                         subtitle = if (state.newMatchesCount > 0) {
                             "Tens ${state.newMatchesCount} match(es) para abrir."
@@ -210,6 +150,7 @@ fun HomeScreen(
 
                 item {
                     HomeActivityCard(
+                        emoji = "💬",
                         title = "Mensagens por ler",
                         subtitle = if (state.unreadConversationsCount > 0) {
                             "Tens ${state.unreadConversationsCount} mensagem(ns) à espera."
@@ -232,6 +173,37 @@ fun HomeScreen(
                     Spacer(modifier = Modifier.height(24.dp))
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun HomeWelcomeCard(
+    userName: String,
+    newMatchesCount: Int,
+    unreadConversationsCount: Int
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(24.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(20.dp)
+        ) {
+            Text(
+                text = "Olá, $userName 👋",
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text(
+                text = "Tens $newMatchesCount matches e $unreadConversationsCount conversas por ler.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
     }
 }
@@ -272,6 +244,59 @@ private fun HomeStatCard(
 }
 
 @Composable
+private fun QuickActionsSection(
+    navController: NavController
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(24.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            Text(
+                text = "Ações rápidas",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold
+            )
+
+            QuickActionButton(
+                text = "Criar Lead",
+                icon = { Icon(Icons.Default.AddBusiness, contentDescription = null) },
+                onClick = { navController.navigate("createLead") }
+            )
+
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                QuickSecondaryButton(
+                    text = "Ver Leads",
+                    icon = { Icon(Icons.Default.Search, contentDescription = null) },
+                    modifier = Modifier.weight(1f),
+                    onClick = { navController.navigate(BottomNavItem.Leads.route) }
+                )
+
+                QuickSecondaryButton(
+                    text = "Matches",
+                    icon = { Icon(Icons.Default.Favorite, contentDescription = null) },
+                    modifier = Modifier.weight(1f),
+                    onClick = { navController.navigate(BottomNavItem.Matches.route) }
+                )
+            }
+
+            QuickSecondaryButton(
+                text = "Abrir Conversas",
+                icon = { Icon(Icons.Default.Chat, contentDescription = null) },
+                modifier = Modifier.fillMaxWidth(),
+                onClick = { navController.navigate(BottomNavItem.Conversations.route) }
+            )
+        }
+    }
+}
+
+@Composable
 private fun QuickActionButton(
     text: String,
     icon: @Composable () -> Unit,
@@ -306,6 +331,7 @@ private fun QuickSecondaryButton(
 
 @Composable
 private fun HomeActivityCard(
+    emoji: String,
     title: String,
     subtitle: String
 ) {
@@ -314,22 +340,30 @@ private fun HomeActivityCard(
         shape = RoundedCornerShape(18.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
-        Column(
-            modifier = Modifier.padding(16.dp)
+        Row(
+            modifier = Modifier.padding(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             Text(
-                text = title,
-                style = MaterialTheme.typography.titleSmall,
-                fontWeight = FontWeight.SemiBold
+                text = emoji,
+                style = MaterialTheme.typography.headlineSmall
             )
 
-            Spacer(modifier = Modifier.height(6.dp))
+            Column {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.SemiBold
+                )
 
-            Text(
-                text = subtitle,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+                Spacer(modifier = Modifier.height(6.dp))
+
+                Text(
+                    text = subtitle,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
         }
     }
 }
