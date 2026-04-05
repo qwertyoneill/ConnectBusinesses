@@ -64,12 +64,18 @@ fun NavGraph(
             ConversationsScreen(navController = navController)
         }
 
-        composable("chat/{conversationId}") { backStack ->
+        composable("chat/{conversationId}/{otherUserName}/{leadId}/{leadName}") { backStack ->
             val conversationId = backStack.arguments?.getString("conversationId")?.toIntOrNull() ?: 0
+            val otherUserName = backStack.arguments?.getString("otherUserName").orEmpty()
+            val leadId = backStack.arguments?.getString("leadId")?.toIntOrNull()
+            val leadName = backStack.arguments?.getString("leadName")
 
             ChatScreen(
+                navController = navController,
                 conversationId = conversationId,
-                otherUserName = ""
+                otherUserName = otherUserName,
+                leadId = leadId,
+                leadName = leadName
             )
         }
         composable("createLead") {

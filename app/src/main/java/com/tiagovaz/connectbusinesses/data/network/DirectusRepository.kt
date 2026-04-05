@@ -182,7 +182,7 @@ class DirectusRepository @Inject constructor(
             val response = api.openConversationFromMatch("Bearer $token", matchId)
 
             if (response.isSuccessful) {
-                val conversationId = response.body()?.data?.conversation_id
+                val conversationId = response.body()?.conversation_id
                 if (conversationId != null) {
                     Result.success(conversationId)
                 } else {

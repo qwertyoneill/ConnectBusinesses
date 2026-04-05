@@ -89,7 +89,24 @@ fun MatchesScreen(
                             onClick = {
                                 if (matchId != null && !isOpening) {
                                     viewModel.openMatchConversation(matchId) { conversationId ->
-                                        navController.navigate("chat/$conversationId")
+                                        val fullName = listOfNotNull(
+                                            match.other_first_name,
+                                            match.other_last_name
+                                        ).joinToString(" ").ifBlank { "Utilizador" }
+
+                                        val safeOtherUserName = java.net.URLEncoder.encode(
+                                            fullName,
+                                            java.nio.charset.StandardCharsets.UTF_8.toString()
+                                        )
+
+                                        val safeLeadName = java.net.URLEncoder.encode(
+                                            match.lead_name ?: "",
+                                            java.nio.charset.StandardCharsets.UTF_8.toString()
+                                        )
+
+                                        navController.navigate(
+                                            "chat/$conversationId/$safeOtherUserName/${match.lead_id}/$safeLeadName"
+                                        )
                                     }
                                 }
                             }

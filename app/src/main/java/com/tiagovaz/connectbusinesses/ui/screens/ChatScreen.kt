@@ -29,15 +29,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import com.tiagovaz.connectbusinesses.data.network.ConversationMessageItem
+import com.tiagovaz.connectbusinesses.ui.components.LeadContextCard
 import com.tiagovaz.connectbusinesses.viewmodel.ChatViewModel
 import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
 
 @Composable
 fun ChatScreen(
+    navController: NavController,
     conversationId: Int,
     otherUserName: String,
+    leadId: Int? = null,
+    leadName: String? = null,
     viewModel: ChatViewModel = hiltViewModel()
 ) {
     val state by viewModel.uiState.collectAsState()
@@ -69,7 +74,16 @@ fun ChatScreen(
         Text(
             text = if (otherUserName.isBlank()) "Chat" else otherUserName,
             style = MaterialTheme.typography.titleLarge,
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier.padding(start = 16.dp, top = 16.dp, end = 16.dp, bottom = 4.dp)
+        )
+
+        LeadContextCard(
+            leadName = leadName,
+            onOpenLead = if (leadId != null) {
+                { navController.navigate("leadDetails/$leadId") }
+            } else {
+                null
+            }
         )
 
         when {

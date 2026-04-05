@@ -35,8 +35,11 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import com.tiagovaz.connectbusinesses.data.network.ConversationItem
 import com.tiagovaz.connectbusinesses.viewmodel.ConversationsViewModel
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
 import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
 
@@ -96,7 +99,24 @@ fun ConversationsScreen(
                     ConversationCard(
                         conversation = conversation,
                         onOpenChat = {
-                            navController.navigate("chat/${conversation.conversation_id}")
+                            val fullName = listOfNotNull(
+                                conversation.other_first_name,
+                                conversation.other_last_name
+                            ).joinToString(" ").ifBlank { "Utilizador" }
+
+                            val safeOtherUserName = java.net.URLEncoder.encode(
+                                fullName,
+                                java.nio.charset.StandardCharsets.UTF_8.toString()
+                            )
+
+                            val safeLeadName = java.net.URLEncoder.encode(
+                                conversation.lead_name ?: "",
+                                java.nio.charset.StandardCharsets.UTF_8.toString()
+                            )
+
+                            navController.navigate(
+                                "chat/${conversation.conversation_id}/$safeOtherUserName/${conversation.lead_id}/$safeLeadName"
+                            )
                         }
                     )
                 }
@@ -132,11 +152,7 @@ private fun ConversationCard(
         shape = RoundedCornerShape(18.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = if (hasUnread) 8.dp else 4.dp),
         colors = CardDefaults.cardColors(
-            containerColor = if (hasUnread) {
-                MaterialTheme.colorScheme.surface
-            } else {
-                MaterialTheme.colorScheme.surface
-            }
+            containerColor = MaterialTheme.colorScheme.surface
         )
     ) {
         Column(
@@ -175,7 +191,7 @@ private fun ConversationCard(
                     Spacer(modifier = Modifier.height(2.dp))
 
                     Text(
-                        text = leadName,
+                        text = "Lead: $leadName",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.primary,
                         maxLines = 1,
