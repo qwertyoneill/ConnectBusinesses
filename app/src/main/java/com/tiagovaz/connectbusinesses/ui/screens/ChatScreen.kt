@@ -32,6 +32,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.tiagovaz.connectbusinesses.data.network.ConversationMessageItem
 import com.tiagovaz.connectbusinesses.ui.components.LeadContextCard
+import com.tiagovaz.connectbusinesses.ui.components.QuickReplyChips
 import com.tiagovaz.connectbusinesses.viewmodel.ChatViewModel
 import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
@@ -83,6 +84,11 @@ fun ChatScreen(
                 { navController.navigate("leadDetails/$leadId") }
             } else {
                 null
+            }
+        )
+        QuickReplyChips(
+            onReplySelected = { quickMessage ->
+                messageText = quickMessage
             }
         )
 
