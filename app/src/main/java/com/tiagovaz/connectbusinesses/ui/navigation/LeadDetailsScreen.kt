@@ -34,6 +34,8 @@ import androidx.navigation.NavController
 import com.tiagovaz.connectbusinesses.viewmodel.LeadDetailsViewModel
 import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
 
 @Composable
 fun LeadDetailsScreen(
@@ -88,6 +90,7 @@ fun LeadDetailsScreen(
                     .fillMaxSize()
                     .padding(16.dp)
             ) {
+
                 Text(
                     text = lead.companyName ?: "Lead",
                     style = MaterialTheme.typography.headlineSmall,
@@ -106,18 +109,105 @@ fun LeadDetailsScreen(
                         DetailRow("Localização", lead.city ?: "-")
                         DetailRow("Descrição", lead.need ?: "-")
 
-                        lead.createdAt?.let { createdAt ->
-                            DetailRow("Criada em", formatLeadDate(createdAt))
+                        lead.createdAt?.let {
+                            DetailRow("Criada em", formatLeadDate(it))
                         }
                     }
                 }
 
-                state.error?.let { error ->
-                    Spacer(modifier = Modifier.height(16.dp))
-                    AssistChip(
-                        onClick = { },
-                        label = { Text(error) }
-                    )
+                Spacer(modifier = Modifier.height(20.dp))
+
+                Text(
+                    text = "Interessados neste lead",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold
+                )
+
+                Spacer(modifier = Modifier.height(10.dp))
+
+                when {
+
+                    state.isLoadingInterested -> {
+                        CircularProgressIndicator()
+                    }
+
+                    state.interested.isEmpty() -> {
+                        Text(
+                            text = "Ainda não existem interessados.",
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+
+                    else -> {
+
+                        Column(
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+
+                            state.interested.forEach { item ->
+
+                                Card(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    shape = RoundedCornerShape(16.dp),
+                                    elevation = CardDefaults.cardElevation(4.dp)
+                                ) {
+
+                                    Column(
+                                        modifier = Modifier.padding(16.dp)
+                                    ) {
+
+                                        val name = listOfNotNull(
+                                            item.first_name,
+                                            item.last_name
+                                        ).joinToString(" ").ifBlank { "Utilizador" }
+
+                                        Text(
+                                            text = name,
+                                            fontWeight = FontWeight.Bold
+                                        )
+
+                                        item.email?.let {
+                                            Spacer(modifier = Modifier.height(6.dp))
+                                            Text(
+                                                text = it,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                            )
+                                        }
+
+                                        Spacer(modifier = Modifier.height(12.dp))
+
+                                        Button(
+                                            onClick = {
+
+                                                viewModel.acceptInterested(
+                                                    item.interested_user_id
+                                                ) { conversationId ->
+
+                                                    val safeUserName =
+                                                        URLEncoder.encode(
+                                                            name,
+                                                            StandardCharsets.UTF_8.toString()
+                                                        )
+
+                                                    val safeLeadName =
+                                                        URLEncoder.encode(
+                                                            lead.companyName ?: "Lead",
+                                                            StandardCharsets.UTF_8.toString()
+                                                        )
+
+                                                    navController.navigate(
+                                                        "chat/$conversationId/$safeUserName/${lead.id}/$safeLeadName"
+                                                    )
+                                                }
+                                            }
+                                        ) {
+                                            Text("Aceitar e abrir conversa")
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
 
                 Spacer(modifier = Modifier.height(24.dp))
@@ -136,6 +226,7 @@ fun LeadDetailsScreen(
                     modifier = Modifier.fillMaxWidth(),
                     enabled = !state.isDeleting
                 ) {
+
                     if (state.isDeleting) {
                         CircularProgressIndicator(strokeWidth = 2.dp)
                     } else {
@@ -162,6 +253,7 @@ fun LeadDetailsScreen(
             },
             title = { Text("Apagar lead") },
             text = { Text("Tens a certeza que queres apagar esta lead? Esta ação não pode ser desfeita.") },
+
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -173,6 +265,7 @@ fun LeadDetailsScreen(
                     Text("Apagar")
                 }
             },
+
             dismissButton = {
                 TextButton(
                     onClick = { showDeleteDialog = false },
@@ -190,13 +283,19 @@ private fun DetailRow(
     label: String,
     value: String
 ) {
-    Column(modifier = Modifier.padding(bottom = 12.dp)) {
+
+    Column(
+        modifier = Modifier.padding(bottom = 12.dp)
+    ) {
+
         Text(
             text = label,
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
+
         Spacer(modifier = Modifier.height(4.dp))
+
         Text(
             text = value,
             style = MaterialTheme.typography.bodyLarge
@@ -205,10 +304,17 @@ private fun DetailRow(
 }
 
 private fun formatLeadDate(raw: String): String {
+
     return try {
+
         val date = OffsetDateTime.parse(raw)
-        date.format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"))
+
+        date.format(
+            DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")
+        )
+
     } catch (_: Exception) {
+
         raw
     }
 }

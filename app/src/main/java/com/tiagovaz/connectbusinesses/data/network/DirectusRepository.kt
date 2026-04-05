@@ -308,5 +308,51 @@ class DirectusRepository @Inject constructor(
             Result.failure(e)
         }
     }
+    suspend fun fetchInterestedInLead(
+        token: String,
+        leadId: Int
+    ): Result<List<LeadInterestedItem>> {
+        return try {
+            val response = api.getInterestedInLead("Bearer $token", leadId)
+
+            if (response.isSuccessful) {
+                Result.success(response.body()?.data ?: emptyList())
+            } else {
+                Result.failure(
+                    Exception("Erro ${response.code()}: ${response.errorBody()?.string()}")
+                )
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+    suspend fun acceptInterestedInLead(
+        token: String,
+        leadId: Int,
+        userId: String
+    ): Result<AcceptInterestedData> {
+        return try {
+            val response = api.acceptInterestedInLead(
+                token = "Bearer $token",
+                leadId = leadId,
+                userId = userId
+            )
+
+            if (response.isSuccessful) {
+                val data = response.body()?.data
+                if (data != null) {
+                    Result.success(data)
+                } else {
+                    Result.failure(Exception("Resposta vazia ao aceitar interessado"))
+                }
+            } else {
+                Result.failure(
+                    Exception("Erro ${response.code()}: ${response.errorBody()?.string()}")
+                )
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 
 }

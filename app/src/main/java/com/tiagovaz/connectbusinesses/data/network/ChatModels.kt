@@ -52,3 +52,35 @@ data class OpenConversationResponse(
     val conversation_id: Int,
     val created: Boolean
 )
+data class InterestedInLeadResponse(
+    val data: List<LeadInterestedItem>
+)
+
+data class LeadInterestedItem(
+    val swipe_id: Int,
+    val interested_user_id: String,
+    val lead: Int,
+    val created_at: String,
+    val first_name: String?,
+    val last_name: String?,
+    val email: String?,
+    val avatar: String?
+)
+
+data class AcceptInterestedResponse(
+    val data: AcceptInterestedData
+)
+
+data class AcceptInterestedData(
+    val match_id: Int,
+    val created: Boolean,
+    val match: AcceptedMatchItem
+)
+
+data class AcceptedMatchItem(
+    val id: Int,
+    val user_a: String,
+    val user_b: String,
+    val lead: Int,
+    val created_at: String
+)

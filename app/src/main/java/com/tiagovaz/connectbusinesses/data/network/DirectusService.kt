@@ -117,4 +117,17 @@ interface DirectusService {
         @Header("Authorization") token: String,
         @Path("id") id: Int
     ): Response<Unit>
+
+    @GET("chat/leads/{id}/interested")
+    suspend fun getInterestedInLead(
+        @Header("Authorization") token: String,
+        @Path("id") leadId: Int
+    ): Response<InterestedInLeadResponse>
+
+    @POST("chat/leads/{leadId}/interested/{userId}/accept")
+    suspend fun acceptInterestedInLead(
+        @Header("Authorization") token: String,
+        @Path("leadId") leadId: Int,
+        @Path("userId") userId: String
+    ): Response<AcceptInterestedResponse>
 }

@@ -3,6 +3,7 @@ package com.tiagovaz.connectbusinesses.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.tiagovaz.connectbusinesses.data.network.DirectusRepository
+import com.tiagovaz.connectbusinesses.data.network.LeadInterestedItem
 import com.tiagovaz.connectbusinesses.data.network.LeadItem
 import com.tiagovaz.connectbusinesses.data.storage.DataStoreManager
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -15,8 +16,13 @@ import javax.inject.Inject
 data class LeadDetailsUiState(
     val isLoading: Boolean = false,
     val isDeleting: Boolean = false,
+    val isLoadingInterested: Boolean = false,
+    val isAcceptingInterested: Boolean = false,
     val lead: LeadItem? = null,
+    val interested: List<LeadInterestedItem> = emptyList(),
     val error: String? = null,
+    val interestedError: String? = null,
+    val actionError: String? = null,
     val deleteSuccess: Boolean = false
 )
 
@@ -55,7 +61,8 @@ class LeadDetailsViewModel @Inject constructor(
                         error = null
                     )
                 }
-            } else {
+                loadInterested(lead.id)
+            }else {
                 _uiState.update {
                     it.copy(
                         isLoading = false,
@@ -101,6 +108,95 @@ class LeadDetailsViewModel @Inject constructor(
                         it.copy(
                             isDeleting = false,
                             error = e.message ?: "Erro ao apagar lead."
+                        )
+                    }
+                }
+        }
+    }
+    fun loadInterested(leadId: Int) {
+        viewModelScope.launch {
+            val token = dataStore.getAccessToken()
+
+            if (token.isNullOrBlank()) {
+                _uiState.update {
+                    it.copy(interestedError = "Inicia sessão para ver interessados.")
+                }
+                return@launch
+            }
+
+            _uiState.update {
+                it.copy(isLoadingInterested = true, interestedError = null)
+            }
+
+            repository.fetchInterestedInLead(token, leadId)
+                .onSuccess { list ->
+                    _uiState.update {
+                        it.copy(
+                            isLoadingInterested = false,
+                            interested = list
+                        )
+                    }
+                }
+                .onFailure { e ->
+                    _uiState.update {
+                        it.copy(
+                            isLoadingInterested = false,
+                            interestedError = e.message
+                        )
+                    }
+                }
+        }
+    }
+    fun acceptInterested(
+        interestedUserId: String,
+        onConversationReady: (Int) -> Unit
+    ) {
+        viewModelScope.launch {
+            val token = dataStore.getAccessToken()
+            val leadId = _uiState.value.lead?.id
+
+            if (token.isNullOrBlank()) {
+                _uiState.update {
+                    it.copy(actionError = "Inicia sessão para aceitar interessados.")
+                }
+                return@launch
+            }
+
+            if (leadId == null) {
+                _uiState.update {
+                    it.copy(actionError = "Lead inválida.")
+                }
+                return@launch
+            }
+
+            _uiState.update {
+                it.copy(isAcceptingInterested = true, actionError = null)
+            }
+
+            repository.acceptInterestedInLead(token, leadId, interestedUserId)
+                .onSuccess { acceptResult ->
+                    repository.openConversationFromMatch(token, acceptResult.match_id)
+                        .onSuccess { conversationId ->
+                            loadInterested(leadId)
+                            _uiState.update {
+                                it.copy(isAcceptingInterested = false, actionError = null)
+                            }
+                            onConversationReady(conversationId)
+                        }
+                        .onFailure { e ->
+                            _uiState.update {
+                                it.copy(
+                                    isAcceptingInterested = false,
+                                    actionError = e.message ?: "Erro ao abrir conversa."
+                                )
+                            }
+                        }
+                }
+                .onFailure { e ->
+                    _uiState.update {
+                        it.copy(
+                            isAcceptingInterested = false,
+                            actionError = e.message ?: "Erro ao aceitar interessado."
                         )
                     }
                 }
