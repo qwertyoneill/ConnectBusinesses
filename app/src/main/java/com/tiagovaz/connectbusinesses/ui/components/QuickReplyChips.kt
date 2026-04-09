@@ -17,27 +17,43 @@ import androidx.compose.ui.unit.dp
 fun QuickReplyChips(
     onReplySelected: (String) -> Unit
 ) {
+
     val scrollState = rememberScrollState()
 
     val quickReplies = listOf(
-        "Tenho interesse" to "Olá! Tenho interesse neste lead. Podemos falar melhor sobre esta oportunidade?",
-        "Quero mais detalhes" to "Olá! Vi o teu lead e tenho interesse. Podes dar-me mais detalhes?",
-        "Vamos agendar" to "Olá! Este lead faz sentido para mim. Queres agendar uma chamada rápida?",
-        "Enviar proposta" to "Olá! Posso preparar uma proposta para este lead. Queres que avance?"
+        "Tenho interesse" to
+                "Olá! Tenho interesse neste lead. Podemos falar melhor sobre esta oportunidade?",
+
+        "Quero mais detalhes" to
+                "Olá! Vi o teu lead e tenho interesse. Podes dar-me mais detalhes?",
+
+        "Agendar chamada" to
+                "Olá! Este lead faz sentido para mim. Queres agendar uma chamada rápida?",
+
+        "Enviar proposta" to
+                "Olá! Posso preparar uma proposta para este lead. Queres que avance?"
     )
 
     Row(
         modifier = Modifier
             .horizontalScroll(scrollState)
-            .padding(horizontal = 12.dp, vertical = 4.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+            .padding(horizontal = 12.dp, vertical = 6.dp),
+        horizontalArrangement = Arrangement.spacedBy(10.dp)
     ) {
+
         quickReplies.forEach { (label, message) ->
+
             AssistChip(
                 onClick = { onReplySelected(message) },
-                label = { Text(label) },
+                label = {
+                    Text(
+                        text = label,
+                        style = MaterialTheme.typography.labelLarge
+                    )
+                },
                 colors = AssistChipDefaults.assistChipColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                    labelColor = MaterialTheme.colorScheme.onSurface
                 )
             )
         }

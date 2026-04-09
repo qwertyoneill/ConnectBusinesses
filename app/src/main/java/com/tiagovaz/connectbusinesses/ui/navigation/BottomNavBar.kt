@@ -6,8 +6,12 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 
 @Composable
-fun BottomNavBar(navController: NavController,
-                 hasNewMatch: Boolean) {
+fun BottomNavBar(
+    navController: NavController,
+    newMatchesCount: Int = 0,
+    unreadChatsCount: Int = 0
+) {
+
     val items = listOf(
         BottomNavItem.Home,
         BottomNavItem.Leads,
@@ -17,25 +21,64 @@ fun BottomNavBar(navController: NavController,
     )
 
     NavigationBar {
+
         val navBackStackEntry = navController.currentBackStackEntryAsState()
         val currentRoute = navBackStackEntry.value?.destination?.route
 
         items.forEach { item ->
+
             NavigationBarItem(
                 selected = currentRoute == item.route,
-                onClick = { navController.navigate(item.route) },
+                onClick = {
+                    navController.navigate(item.route) {
+                        popUpTo(navController.graph.startDestinationId)
+                        launchSingleTop = true
+                    }
+                },
+
                 icon = {
+
                     BadgedBox(
                         badge = {
-                            if (item.route == BottomNavItem.Matches.route && hasNewMatch) {
-                                Badge()
+
+                            when (item.route) {
+
+                                BottomNavItem.Matches.route -> {
+                                    if (newMatchesCount > 0) {
+                                        Badge {
+                                            Text(
+                                                text =
+                                                    if (newMatchesCount > 99) "99+"
+                                                    else newMatchesCount.toString()
+                                            )
+                                        }
+                                    }
+                                }
+
+                                BottomNavItem.Conversations.route -> {
+                                    if (unreadChatsCount > 0) {
+                                        Badge {
+                                            Text(
+                                                text =
+                                                    if (unreadChatsCount > 99) "99+"
+                                                    else unreadChatsCount.toString()
+                                            )
+                                        }
+                                    }
+                                }
                             }
                         }
                     ) {
-                        Icon(item.icon, contentDescription = item.label)
+                        Icon(
+                            imageVector = item.icon,
+                            contentDescription = item.label
+                        )
                     }
                 },
-                label = { Text(item.label) }
+
+                label = {
+                    Text(item.label)
+                }
             )
         }
     }

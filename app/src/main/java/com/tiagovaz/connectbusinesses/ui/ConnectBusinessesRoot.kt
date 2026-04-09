@@ -51,7 +51,8 @@ fun ConnectBusinessesRoot(
         composable("main") {
             MainAppWithBottomNav(
                 authViewModel = authViewModel,
-                hasNewMatch = false
+                newMatchesCount = 0,
+                unreadChatsCount = 0
             )
         }
     }

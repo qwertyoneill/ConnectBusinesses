@@ -14,8 +14,10 @@ import com.tiagovaz.connectbusinesses.viewmodel.AuthViewModel
 @Composable
 fun MainAppWithBottomNav(
     authViewModel: AuthViewModel,
-    hasNewMatch: Boolean
+    newMatchesCount: Int = 0,
+    unreadChatsCount: Int = 0
 ) {
+
     val navController = rememberNavController()
 
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -25,18 +27,25 @@ fun MainAppWithBottomNav(
 
     Scaffold(
         bottomBar = {
+
             if (showBottomBar) {
+
                 BottomNavBar(
                     navController = navController,
-                    hasNewMatch = hasNewMatch
+                    newMatchesCount = newMatchesCount,
+                    unreadChatsCount = unreadChatsCount
                 )
+
             }
+
         }
     ) { innerPadding ->
+
         NavGraph(
             navController = navController,
             paddingValues = if (showBottomBar) innerPadding else PaddingValues(0.dp),
             authViewModel = authViewModel
         )
+
     }
 }

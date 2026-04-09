@@ -8,6 +8,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
@@ -68,8 +69,8 @@ fun LeadsScreen(
                         lead = lead,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(screenHeight - 32.dp)
-                            .padding(0.dp),
+                            .height(screenHeight - 80.dp)
+                            .padding(horizontal = 16.dp, vertical = 24.dp),
                         isActive = isActive,
                         shadowColor = shadowColor,
                         borderColor = borderColor
@@ -78,10 +79,34 @@ fun LeadsScreen(
             }
 
             else -> {
-                Text(
-                    text = "Sem leads disponíveis.",
-                    style = MaterialTheme.typography.bodyLarge
-                )
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center,
+                    modifier = Modifier.fillMaxSize()
+                ) {
+
+                    Text(
+                        text = "🚀",
+                        style = MaterialTheme.typography.displayMedium
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Text(
+                        text = "Não existem mais leads",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold
+
+                    )
+
+                    Spacer(modifier = Modifier.height(6.dp))
+
+                    Text(
+                        text = "Volta mais tarde para descobrir novas oportunidades.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
         }
     }
