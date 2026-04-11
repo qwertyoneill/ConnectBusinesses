@@ -1,6 +1,5 @@
 package com.tiagovaz.connectbusinesses.ui.screens
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -12,19 +11,17 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.ime
-import androidx.compose.foundation.layout.navigationBars
-import androidx.compose.foundation.layout.union
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -48,6 +45,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -56,6 +54,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -78,7 +77,6 @@ private val BrandBlue = Color(0xFF1671C7)
 private val BrandCyan = Color(0xFF1EB7D8)
 private val OnlineGreen = Color(0xFF2DBE60)
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ChatScreen(
     navController: NavController,
@@ -93,6 +91,9 @@ fun ChatScreen(
     val listState = rememberLazyListState()
     val density = LocalDensity.current
     val imeBottom = WindowInsets.ime.getBottom(density)
+
+    var composerHeightPx by rememberSaveable { mutableIntStateOf(0) }
+    val composerHeightDp = with(density) { composerHeightPx.toDp() }
 
     val displayName = otherUserName
         .replace("+", " ")
@@ -112,13 +113,13 @@ fun ChatScreen(
 
     LaunchedEffect(state.messages.size) {
         if (state.messages.isNotEmpty()) {
-            listState.animateScrollToItem(state.messages.lastIndex)
+            listState.scrollToItem(state.messages.lastIndex)
         }
     }
 
     LaunchedEffect(imeBottom) {
         if (imeBottom > 0 && state.messages.isNotEmpty()) {
-            listState.animateScrollToItem(state.messages.lastIndex)
+            listState.scrollToItem(state.messages.lastIndex)
         }
     }
 
@@ -127,7 +128,6 @@ fun ChatScreen(
             .fillMaxSize()
             .background(ChatBg)
             .statusBarsPadding()
-            .navigationBarsPadding()
     ) {
         ChatHeader(name = displayName)
 
@@ -180,18 +180,20 @@ fun ChatScreen(
                         .weight(1f)
                         .fillMaxWidth()
                         .padding(horizontal = 12.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                    contentPadding = PaddingValues(top = 4.dp, bottom = 8.dp)
+                    verticalArrangement = Arrangement.spacedBy(
+                        space = 8.dp,
+                        alignment = Alignment.Bottom
+                    ),
+                    contentPadding = PaddingValues(
+                        top = 4.dp,
+                        bottom = 8.dp
+                    )
                 ) {
                     items(state.messages, key = { it.id }) { msg ->
                         MessageBubble(
                             message = msg,
                             isMine = msg.sender_user_id == state.currentUserId
                         )
-                    }
-
-                    item {
-                        Spacer(modifier = Modifier.height(6.dp))
                     }
                 }
             }
@@ -215,7 +217,8 @@ fun ChatScreen(
                     messageText = ""
                 }
             },
-            sending = state.sending
+            sending = state.sending,
+            modifier = Modifier.onSizeChanged { composerHeightPx = it.height }
         )
     }
 }
@@ -357,12 +360,14 @@ private fun ChatComposer(
     messageText: String,
     onMessageChange: (String) -> Unit,
     onSend: () -> Unit,
-    sending: Boolean
+    sending: Boolean,
+    modifier: Modifier = Modifier
 ) {
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
-            .windowInsetsPadding(WindowInsets.ime.union(WindowInsets.navigationBars))
+            .imePadding()
+            .navigationBarsPadding()
             .padding(horizontal = 12.dp, vertical = 10.dp),
         verticalAlignment = Alignment.Bottom
     ) {

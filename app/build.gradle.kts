@@ -9,7 +9,7 @@ plugins {
 
 android {
     namespace = "com.tiagovaz.connectbusinesses"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.tiagovaz.connectbusinesses"
@@ -20,14 +20,19 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
-    buildFeatures { compose = true }
+    buildFeatures {
+        compose = true
+    }
 
+    kotlinOptions {
+        jvmTarget = "17"
+    }
 
-    kotlinOptions { jvmTarget = "17" }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
+
     kapt {
         useBuildCache = true
         javacOptions {
@@ -37,34 +42,40 @@ android {
 }
 
 dependencies {
-    // Compose BOM – usa algo recente e estável
-    implementation(platform("androidx.compose:compose-bom:2024.09.01"))
+    // Compose
+    implementation(platform("androidx.compose:compose-bom:2025.12.00"))
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-tooling-preview")
     debugImplementation("androidx.compose.ui:ui-tooling")
     implementation("androidx.compose.material3:material3")
     implementation("androidx.compose.material:material-icons-extended")
-    implementation("androidx.activity:activity-compose:1.9.3")
+    implementation("androidx.compose.foundation:foundation")
+
+    // Activity + Navigation
+    implementation("androidx.activity:activity-compose:1.12.4")
     implementation("androidx.navigation:navigation-compose:2.8.3")
+
+    // Image loading
     implementation("io.coil-kt:coil-compose:2.6.0")
     implementation("io.coil-kt:coil:2.6.0")
+
+    // Lifecycle
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.6")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.6")
-    implementation("com.google.accompanist:accompanist-navigation-animation:0.36.0")
-    implementation("androidx.compose.foundation:foundation:1.7.4")
 
-    // Credential Manager (MODERNO)
+    // Accompanist
+    implementation("com.google.accompanist:accompanist-navigation-animation:0.36.0")
+    implementation("com.google.accompanist:accompanist-swiperefresh:0.31.5-beta")
+
+    // Credential Manager
     implementation("androidx.credentials:credentials:1.6.0-rc01")
     implementation("androidx.credentials:credentials-play-services-auth:1.6.0-rc01")
 
-    // Google Identity (MODERNO)
+    // Google Identity
     implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
 
-
-    // 🔥 Firebase BOM (2025)
+    // Firebase
     implementation(platform("com.google.firebase:firebase-bom:34.7.0"))
-
-    // 🔐 Firebase Authentication
     implementation("com.google.firebase:firebase-auth")
 
     // Hilt
@@ -79,9 +90,7 @@ dependencies {
 
     // Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
-    // DataStore (Preferences)
-    implementation("androidx.datastore:datastore-preferences:1.1.1")
 
-    //accompanist-swiperefresh
-    implementation("com.google.accompanist:accompanist-swiperefresh:0.31.5-beta")
+    // DataStore
+    implementation("androidx.datastore:datastore-preferences:1.1.1")
 }
