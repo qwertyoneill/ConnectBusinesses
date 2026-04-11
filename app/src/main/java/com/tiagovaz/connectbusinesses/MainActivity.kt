@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import com.tiagovaz.connectbusinesses.ui.ConnectBusinessesRoot
 import com.tiagovaz.connectbusinesses.ui.theme.ConnectBusinessesTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -12,10 +13,20 @@ import dagger.hilt.android.AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        WindowCompat.setDecorFitsSystemWindows(window, false)// 👈 essencial para o teclado empurrar o layout
+
+        // O conteúdo respeita as barras do sistema
+        WindowCompat.setDecorFitsSystemWindows(window, true)
+
+        // Ícones escuros na barra de estado e navegação
+        WindowInsetsControllerCompat(window, window.decorView).apply {
+            isAppearanceLightStatusBars = true
+            isAppearanceLightNavigationBars = true
+        }
+
         setContent {
-            ConnectBusinessesRoot()
+            ConnectBusinessesTheme {
+                ConnectBusinessesRoot()
+            }
         }
     }
 }
-
