@@ -239,7 +239,7 @@ fun LoginFields(
             IconButton(
                 onClick = {
                     scope.launch {
-                        googleAuth.signInWithGoogle(
+                        googleAuth.signInWithGoogleButton(
                             onSuccess = { _, _, _, firebaseToken ->
                                 viewModel.loginWithFirebaseIdToken(firebaseToken)
                             },
