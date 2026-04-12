@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.tiagovaz.connectbusinesses.data.network.DirectusRepository
+import com.tiagovaz.connectbusinesses.data.network.auth.AuthErrorMapper
 import com.tiagovaz.connectbusinesses.data.storage.DataStoreManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -48,33 +49,39 @@ class AuthViewModel @Inject constructor(
             _isLoading.value = true
             _loginError.value = ""
 
-            val loginResponse = repository.login(email.value, password.value)
-            val authToken = loginResponse?.data?.access_token
-            val refreshToken = loginResponse?.data?.refresh_token
+            try {
+                val loginResponse = repository.login(email.value, password.value)
+                val authToken = loginResponse?.data?.access_token
+                val refreshToken = loginResponse?.data?.refresh_token
 
-            if (authToken != null) {
-                dataStoreManager.saveToken(authToken)
-                if (refreshToken != null) dataStoreManager.saveRefreshToken(refreshToken)
-                _token.value = authToken
-                _isLoggedIn.value = true
+                if (!authToken.isNullOrBlank()) {
+                    dataStoreManager.saveToken(authToken)
+                    if (refreshToken != null) dataStoreManager.saveRefreshToken(refreshToken)
 
-                val profileResponse = repository.getMe(authToken)
-                val user = profileResponse?.data
+                    _token.value = authToken
+                    _isLoggedIn.value = true
 
-                val finalUserName = listOfNotNull(
-                    user?.first_name,
-                    user?.last_name
-                ).joinToString(" ").ifBlank { "Utilizador" }
+                    val profileResponse = repository.getMe(authToken)
+                    val user = profileResponse?.data
 
-                dataStoreManager.saveUserName(finalUserName)
-                user?.id?.let { dataStoreManager.saveUserId(it) }
+                    val finalUserName = listOfNotNull(
+                        user?.first_name,
+                        user?.last_name
+                    ).joinToString(" ").ifBlank { "Utilizador" }
 
-                _userName.value = finalUserName
-            } else {
-                _loginError.value = "Email ou password incorretos"
+                    dataStoreManager.saveUserName(finalUserName)
+                    user?.id?.let { dataStoreManager.saveUserId(it) }
+
+                    _userName.value = finalUserName
+                } else {
+                    _loginError.value = "Email ou palavra-passe incorretos."
+                }
+            } catch (e: Exception) {
+                _loginError.value = AuthErrorMapper.fromServerMessage(e.message)
+                Log.e("AUTH_COMPARE", "ERRO LOGIN PASSWORD", e)
+            } finally {
+                _isLoading.value = false
             }
-
-            _isLoading.value = false
         }
     }
 
@@ -143,6 +150,10 @@ class AuthViewModel @Inject constructor(
         _password.value = newPassword
     }
 
+    fun clearLoginError() {
+        _loginError.value = ""
+    }
+
     fun clearLoginFields() {
         _email.value = ""
         _password.value = ""
@@ -199,43 +210,53 @@ class AuthViewModel @Inject constructor(
             _isLoading.value = true
             _loginError.value = ""
 
-            val resp = repository.firebaseLogin(firebaseIdToken)
+            try {
+                val resp = repository.firebaseLogin(firebaseIdToken)
 
-            Log.d("AUTH_COMPARE", "RESP TOKEN: ${resp?.access_token?.take(40)}")
-            Log.d("AUTH_COMPARE", "RESP USER EMAIL: ${resp?.user?.email}")
+                Log.d("AUTH_COMPARE", "RESP TOKEN: ${resp?.access_token?.take(40)}")
+                Log.d("AUTH_COMPARE", "RESP USER EMAIL: ${resp?.user?.email}")
 
-            val directusToken = resp?.access_token
-            val firstName = resp?.user?.first_name.orEmpty()
-            val lastName = resp?.user?.last_name.orEmpty()
-            val finalUserName = listOfNotNull(firstName, lastName)
-                .filter { it.isNotBlank() }
-                .joinToString(" ")
-                .ifBlank { firstName.ifBlank { "Utilizador" } }
+                val directusToken = resp?.access_token
+                val firstName = resp?.user?.first_name.orEmpty()
+                val lastName = resp?.user?.last_name.orEmpty()
 
-            if (!directusToken.isNullOrBlank()) {
-                dataStoreManager.saveToken(directusToken)
-                dataStoreManager.saveUserName(finalUserName)
-                dataStoreManager.saveAuthMethod("firebase")
-                resp?.user?.id?.let { dataStoreManager.saveUserId(it) }
+                val finalUserName = listOfNotNull(firstName, lastName)
+                    .filter { it.isNotBlank() }
+                    .joinToString(" ")
+                    .ifBlank { firstName.ifBlank { "Utilizador" } }
 
-                Log.d("AUTH_COMPARE", "TOKEN GUARDADO: ${directusToken.take(40)}")
+                if (!directusToken.isNullOrBlank()) {
+                    dataStoreManager.saveToken(directusToken)
+                    dataStoreManager.saveUserName(finalUserName)
+                    dataStoreManager.saveAuthMethod("firebase")
+                    resp.user?.id?.let { dataStoreManager.saveUserId(it) }
 
-                _token.value = directusToken
-                _userName.value = finalUserName
-                _isLoggedIn.value = true
+                    Log.d("AUTH_COMPARE", "TOKEN GUARDADO: ${directusToken.take(40)}")
 
-                Log.d("AUTH_COMPARE", "TOKEN ATRIBUÍDO A _token: ${directusToken.take(40)}")
-            } else {
-                _loginError.value = "Falha no login Google."
-                Log.d("AUTH_COMPARE", "LOGIN FIREBASE FALHOU - token nulo ou vazio")
+                    _token.value = directusToken
+                    _userName.value = finalUserName
+                    _isLoggedIn.value = true
+
+                    Log.d("AUTH_COMPARE", "TOKEN ATRIBUÍDO A _token: ${directusToken.take(40)}")
+                } else {
+                    _loginError.value = "Falha na autenticação com Google."
+                    Log.d("AUTH_COMPARE", "LOGIN FIREBASE FALHOU - token nulo ou vazio")
+                }
+            } catch (e: Exception) {
+                _loginError.value = AuthErrorMapper.fromServerMessage(e.message)
+                Log.e("AUTH_COMPARE", "ERRO LOGIN FIREBASE", e)
+            } finally {
+                _isLoading.value = false
             }
-
-            _isLoading.value = false
         }
     }
 
     fun onGoogleLoginError(message: String) {
-        _loginError.value = message
+        _loginError.value = if (message.isBlank()) {
+            "Falha na autenticação com Google."
+        } else {
+            message
+        }
         _isLoading.value = false
     }
 }

@@ -5,7 +5,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.runtime.LaunchedEffect
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.rememberCoroutineScope
-import com.tiagovaz.connectbusinesses.auth.FirebaseGoogleAuth
+import com.tiagovaz.connectbusinesses.data.network.auth.FirebaseGoogleAuth
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -31,9 +31,9 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.tiagovaz.connectbusinesses.R
 import com.tiagovaz.connectbusinesses.viewmodel.AuthViewModel
+import com.tiagovaz.connectbusinesses.data.network.auth.AuthErrorMapper
 
 @Composable
 fun LoginScreen(
@@ -179,6 +179,7 @@ fun LoginFields(
         Button(
             onClick = {
                 focusManager.clearFocus()
+                viewModel.clearLoginError()
                 viewModel.login()
             },
             modifier = Modifier
@@ -238,6 +239,7 @@ fun LoginFields(
         ) {
             IconButton(
                 onClick = {
+                    viewModel.clearLoginError()
                     scope.launch {
                         googleAuth.signInWithGoogleButton(
                             onSuccess = { _, _, _, firebaseToken ->
@@ -245,7 +247,7 @@ fun LoginFields(
                             },
                             onError = { error ->
                                 viewModel.onGoogleLoginError(
-                                    error.message ?: "Erro no login Google"
+                                    AuthErrorMapper.toUserMessage(error)
                                 )
                             }
                         )

@@ -1,4 +1,4 @@
-package com.tiagovaz.connectbusinesses.auth
+package com.tiagovaz.connectbusinesses.data.network.auth
 
 import android.content.Context
 import androidx.credentials.CredentialManager
@@ -17,7 +17,7 @@ import com.tiagovaz.connectbusinesses.R
 class FirebaseGoogleAuth(
     private val context: Context
 ) {
-    private val credentialManager = CredentialManager.create(context)
+    private val credentialManager = CredentialManager.Companion.create(context)
     private val firebaseAuth = FirebaseAuth.getInstance()
 
     private val serverClientId: String
@@ -48,7 +48,7 @@ class FirebaseGoogleAuth(
         }
     }
 
-    suspend fun trySilentGoogleSignIn(
+    suspend fun rySilentGoogleSignIn(
         onSuccess: (String, String?, String?, String) -> Unit,
         onError: (Throwable) -> Unit
     ) {
@@ -87,13 +87,13 @@ class FirebaseGoogleAuth(
 
         if (
             credential !is CustomCredential ||
-            credential.type != GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL
+            credential.type != GoogleIdTokenCredential.Companion.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL
         ) {
             onError(IllegalStateException("Credencial Google inválida"))
             return
         }
 
-        val googleCredential = GoogleIdTokenCredential.createFrom(credential.data)
+        val googleCredential = GoogleIdTokenCredential.Companion.createFrom(credential.data)
         val idToken = googleCredential.idToken
         val firebaseCredential = GoogleAuthProvider.getCredential(idToken, null)
 
