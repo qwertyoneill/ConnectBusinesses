@@ -2,9 +2,10 @@ package com.tiagovaz.connectbusinesses.data.network
 
 import com.tiagovaz.connectbusinesses.data.network.auth.FirebaseLoginRequest
 import com.tiagovaz.connectbusinesses.data.network.auth.FirebaseLoginResponse
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
+import android.content.Context
+import android.net.Uri
+import com.tiagovaz.connectbusinesses.utils.FileUploadUtils
 
 class DirectusRepository @Inject constructor(
     private val api: DirectusService
@@ -202,7 +203,8 @@ class DirectusRepository @Inject constructor(
         name: String,
         type: String,
         description: String?,
-        location: String?
+        location: String?,
+        backgroundFile: String? = null
     ): Result<CreatedLeadItem> {
         return try {
             val response = api.createLead(
@@ -211,7 +213,8 @@ class DirectusRepository @Inject constructor(
                     name = name.trim(),
                     type = type.trim(),
                     description = description?.trim()?.ifBlank { null },
-                    location = location?.trim()?.ifBlank { null }
+                    location = location?.trim()?.ifBlank { null },
+                    background_file = backgroundFile
                 )
             )
 
@@ -354,5 +357,34 @@ class DirectusRepository @Inject constructor(
             Result.failure(e)
         }
     }
+    suspend fun uploadImage(
+        token: String,
+        context: Context,
+        uri: Uri
+    ): Result<String> {
+        return try {
+            val part = FileUploadUtils.uriToMultipart(context, uri)
 
+            val response = api.uploadFile(
+                token = "Bearer $token",
+                file = part
+            )
+
+            if (response.isSuccessful) {
+                val fileId = response.body()?.data?.id
+
+                if (fileId != null) {
+                    Result.success(fileId)
+                } else {
+                    Result.failure(Exception("Upload sem ID"))
+                }
+            } else {
+                Result.failure(
+                    Exception("Erro ${response.code()}: ${response.errorBody()?.string()}")
+                )
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 }

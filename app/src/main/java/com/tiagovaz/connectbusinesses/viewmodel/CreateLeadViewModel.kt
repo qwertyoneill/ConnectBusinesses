@@ -1,5 +1,7 @@
 package com.tiagovaz.connectbusinesses.viewmodel
 
+import android.content.Context
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.tiagovaz.connectbusinesses.data.network.DirectusRepository
@@ -36,11 +38,18 @@ class CreateLeadViewModel @Inject constructor(
         _uiState.update { it.copy(location = value) }
     }
 
+    fun onImageSelected(uri: Uri?) {
+        _uiState.update { it.copy(selectedImageUri = uri) }
+    }
+
     fun clearMessages() {
         _uiState.update { it.copy(successMessage = null, errorMessage = null) }
     }
 
-    fun submit(onSuccess: () -> Unit) {
+    fun submit(
+        context: Context,
+        onSuccess: () -> Unit
+    ) {
         viewModelScope.launch {
             val state = _uiState.value
             val token = dataStore.getAccessToken()
@@ -74,12 +83,33 @@ class CreateLeadViewModel @Inject constructor(
                 )
             }
 
+            val backgroundFileResult = if (state.selectedImageUri != null) {
+                repository.uploadImage(
+                    token = token,
+                    context = context,
+                    uri = state.selectedImageUri
+                )
+            } else {
+                null
+            }
+
+            val backgroundFileId = backgroundFileResult?.getOrElse { error ->
+                _uiState.update {
+                    it.copy(
+                        isSubmitting = false,
+                        errorMessage = error.message ?: "Erro ao enviar imagem."
+                    )
+                }
+                return@launch
+            }
+
             repository.createLead(
                 token = token,
                 name = state.name,
                 type = state.type,
                 description = state.description,
-                location = state.location
+                location = state.location,
+                backgroundFile = backgroundFileId
             ).onSuccess {
                 _uiState.update {
                     it.copy(

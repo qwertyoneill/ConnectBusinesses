@@ -23,6 +23,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import com.tiagovaz.connectbusinesses.data.network.LeadItem
+import com.tiagovaz.connectbusinesses.utils.LeadImageUtils
 
 @Composable
 fun LeadCard(
@@ -32,7 +33,7 @@ fun LeadCard(
     shadowColor: Color = Color.Black.copy(alpha = 0.25f),
     borderColor: Color = Color.Transparent
 ) {
-    val imageUrl = lead.imageUrl
+    val imageUrl = LeadImageUtils.buildLeadImageUrl(lead.backgroundFile)
         ?: "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=1080"
 
     val cornerRadius by animateDpAsState(

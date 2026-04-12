@@ -18,8 +18,8 @@ data class LeadItem(
     @SerializedName("description")
     val need: String?,
 
-    @SerializedName("imageUrl")
-    val imageUrl: String?,
+    @SerializedName("background_file")
+    val backgroundFile: String?,
 
     @SerializedName("type")
     val type: String?,
@@ -33,6 +33,7 @@ data class LeadItem(
     @SerializedName("relevance_score")
     val relevanceScore: Int?
 )
+
 data class LeadDetailsResponse(
     val data: LeadItem?
 )

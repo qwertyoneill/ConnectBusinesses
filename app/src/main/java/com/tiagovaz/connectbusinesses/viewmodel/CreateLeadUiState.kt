@@ -6,6 +6,7 @@ data class CreateLeadUiState(
     val type: String = "",
     val description: String = "",
     val location: String = "",
+    val selectedImageUri: android.net.Uri? = null,
     val successMessage: String? = null,
     val errorMessage: String? = null
 )

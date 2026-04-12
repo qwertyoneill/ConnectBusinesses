@@ -1,5 +1,9 @@
 package com.tiagovaz.connectbusinesses.ui.screens
 
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -8,6 +12,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
@@ -19,9 +25,12 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import coil.compose.rememberAsyncImagePainter
 import com.tiagovaz.connectbusinesses.viewmodel.CreateLeadViewModel
 
 @Composable
@@ -29,7 +38,14 @@ fun CreateLeadScreen(
     navController: NavController,
     viewModel: CreateLeadViewModel = hiltViewModel()
 ) {
+    val context = LocalContext.current
     val state by viewModel.uiState.collectAsState()
+
+    val imagePicker = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: Uri? ->
+        viewModel.onImageSelected(uri)
+    }
 
     LaunchedEffect(state.successMessage) {
         if (state.successMessage != null) {
@@ -41,6 +57,7 @@ fun CreateLeadScreen(
         modifier = Modifier
             .fillMaxSize()
             .imePadding()
+            .verticalScroll(rememberScrollState())
             .padding(16.dp),
         verticalArrangement = Arrangement.Top
     ) {
@@ -91,6 +108,34 @@ fun CreateLeadScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
+        Button(
+            onClick = { imagePicker.launch("image/*") },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(
+                if (state.selectedImageUri != null) {
+                    "Alterar imagem"
+                } else {
+                    "Escolher imagem"
+                }
+            )
+        }
+
+        if (state.selectedImageUri != null) {
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Image(
+                painter = rememberAsyncImagePainter(state.selectedImageUri),
+                contentDescription = "Pré-visualização da imagem",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(180.dp),
+                contentScale = ContentScale.Crop
+            )
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
         state.errorMessage?.let {
             AssistChip(
                 onClick = { viewModel.clearMessages() },
@@ -101,7 +146,7 @@ fun CreateLeadScreen(
 
         Button(
             onClick = {
-                viewModel.submit {
+                viewModel.submit(context) {
                     navController.popBackStack()
                 }
             },
@@ -114,5 +159,7 @@ fun CreateLeadScreen(
                 Text("Criar Lead")
             }
         }
+
+        Spacer(modifier = Modifier.height(24.dp))
     }
 }

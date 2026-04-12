@@ -4,6 +4,9 @@ import com.tiagovaz.connectbusinesses.data.network.auth.FirebaseLoginRequest
 import com.tiagovaz.connectbusinesses.data.network.auth.FirebaseLoginResponse
 import retrofit2.Response
 import retrofit2.http.*
+import okhttp3.MultipartBody
+import retrofit2.http.Multipart
+import retrofit2.http.Part
 
 interface DirectusService {
 
@@ -130,4 +133,11 @@ interface DirectusService {
         @Path("leadId") leadId: Int,
         @Path("userId") userId: String
     ): Response<AcceptInterestedResponse>
+
+    @Multipart
+    @POST("files")
+    suspend fun uploadFile(
+        @Header("Authorization") token: String,
+        @Part file: MultipartBody.Part
+    ): Response<UploadFileResponse>
 }

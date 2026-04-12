@@ -32,6 +32,10 @@ import com.tiagovaz.connectbusinesses.data.network.MyLeadItem
 import com.tiagovaz.connectbusinesses.viewmodel.MyLeadsViewModel
 import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
+import androidx.compose.foundation.Image
+import androidx.compose.ui.layout.ContentScale
+import coil.compose.rememberAsyncImagePainter
+import com.tiagovaz.connectbusinesses.utils.LeadImageUtils
 
 @Composable
 fun MyLeadsScreen(
@@ -104,6 +108,8 @@ private fun MyLeadCard(
     lead: MyLeadItem,
     onClick: () -> Unit
 ) {
+    val imageUrl = LeadImageUtils.buildLeadImageUrl(lead.backgroundFile)
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -111,48 +117,61 @@ private fun MyLeadCard(
         shape = RoundedCornerShape(18.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 5.dp)
     ) {
-        Column(
-            modifier = Modifier.padding(16.dp)
-        ) {
-            Text(
-                text = lead.name,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold
-            )
-
-            Spacer(modifier = Modifier.height(6.dp))
-
-            Text(
-                text = lead.type,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.primary
-            )
-
-            lead.location?.takeIf { it.isNotBlank() }?.let {
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = it,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+        Column {
+            if (imageUrl != null) {
+                Image(
+                    painter = rememberAsyncImagePainter(imageUrl),
+                    contentDescription = lead.name,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(180.dp),
+                    contentScale = ContentScale.Crop
                 )
             }
 
-            lead.description?.takeIf { it.isNotBlank() }?.let {
-                Spacer(modifier = Modifier.height(8.dp))
+            Column(
+                modifier = Modifier.padding(16.dp)
+            ) {
                 Text(
-                    text = it,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    text = lead.name,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold
                 )
-            }
 
-            lead.created_at?.let {
-                Spacer(modifier = Modifier.height(10.dp))
+                Spacer(modifier = Modifier.height(6.dp))
+
                 Text(
-                    text = "Criada em ${formatLeadDate(it)}",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    text = lead.type,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.primary
                 )
+
+                lead.location?.takeIf { it.isNotBlank() }?.let {
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = it,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+
+                lead.description?.takeIf { it.isNotBlank() }?.let {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = it,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+
+                lead.created_at?.let {
+                    Spacer(modifier = Modifier.height(10.dp))
+                    Text(
+                        text = "Criada em ${formatLeadDate(it)}",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
         }
     }
