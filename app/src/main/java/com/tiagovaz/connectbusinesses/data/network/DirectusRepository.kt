@@ -25,6 +25,7 @@ class DirectusRepository @Inject constructor(
     } catch (e: Exception) {
         false
     }
+
     suspend fun fetchMatches(token: String): Result<List<MatchViewItem>> {
         return try {
             val response = api.getMatches("Bearer $token")
@@ -41,22 +42,27 @@ class DirectusRepository @Inject constructor(
         }
     }
 
-
     // ---------------- AUTH / PERFIL ----------------
 
     suspend fun login(email: String, password: String): LoginResponse? = try {
         val response = api.login(LoginRequest(email, password))
         if (response.isSuccessful) response.body() else null
-    } catch (e: Exception) { null }
+    } catch (e: Exception) {
+        null
+    }
 
     suspend fun fetchLeadDetails(token: String, leadId: String) = try {
         api.getLeadDetails("Bearer $token", leadId).body()?.data
-    } catch (e: Exception) { null }
+    } catch (e: Exception) {
+        null
+    }
 
     suspend fun getMe(token: String): UserProfileResponse? = try {
         val response = api.getMe("Bearer $token")
         if (response.isSuccessful) response.body() else null
-    } catch (e: Exception) { null }
+    } catch (e: Exception) {
+        null
+    }
 
     suspend fun registerUser(
         firstName: String,
@@ -67,12 +73,16 @@ class DirectusRepository @Inject constructor(
         api.register(
             CreateUserRequest(email, password, firstName, lastName)
         ).isSuccessful
-    } catch (e: Exception) { false }
+    } catch (e: Exception) {
+        false
+    }
 
     suspend fun firebaseLogin(idToken: String): FirebaseLoginResponse? = try {
         val response = api.firebaseLogin(FirebaseLoginRequest(idToken))
         if (response.isSuccessful) response.body() else null
-    } catch (e: Exception) { null }
+    } catch (e: Exception) {
+        null
+    }
 
     suspend fun fetchFeedLeads(token: String, limit: Int = 20): List<LeadItem> = try {
         val response = api.getFeedLeads("Bearer $token", limit)
@@ -175,6 +185,7 @@ class DirectusRepository @Inject constructor(
             Result.failure(e)
         }
     }
+
     suspend fun openConversationFromMatch(
         token: String,
         matchId: Int
@@ -198,6 +209,7 @@ class DirectusRepository @Inject constructor(
             Result.failure(e)
         }
     }
+
     suspend fun createLead(
         token: String,
         name: String,
@@ -234,6 +246,7 @@ class DirectusRepository @Inject constructor(
             Result.failure(e)
         }
     }
+
     suspend fun fetchMyLeads(
         token: String,
         ownerId: String
@@ -255,13 +268,15 @@ class DirectusRepository @Inject constructor(
             Result.failure(e)
         }
     }
+
     suspend fun updateLead(
         token: String,
         id: Int,
         name: String,
         type: String,
         description: String?,
-        location: String?
+        location: String?,
+        backgroundFile: String? = null
     ): Result<CreatedLeadItem> {
         return try {
             val response = api.updateLead(
@@ -271,7 +286,8 @@ class DirectusRepository @Inject constructor(
                     name = name.trim(),
                     type = type.trim(),
                     description = description?.trim()?.ifBlank { null },
-                    location = location?.trim()?.ifBlank { null }
+                    location = location?.trim()?.ifBlank { null },
+                    background_file = backgroundFile
                 )
             )
 
@@ -291,6 +307,7 @@ class DirectusRepository @Inject constructor(
             Result.failure(e)
         }
     }
+
     suspend fun deleteLead(
         token: String,
         id: Int
@@ -311,6 +328,7 @@ class DirectusRepository @Inject constructor(
             Result.failure(e)
         }
     }
+
     suspend fun fetchInterestedInLead(
         token: String,
         leadId: Int
@@ -329,6 +347,7 @@ class DirectusRepository @Inject constructor(
             Result.failure(e)
         }
     }
+
     suspend fun acceptInterestedInLead(
         token: String,
         leadId: Int,
@@ -357,6 +376,7 @@ class DirectusRepository @Inject constructor(
             Result.failure(e)
         }
     }
+
     suspend fun uploadImage(
         token: String,
         context: Context,

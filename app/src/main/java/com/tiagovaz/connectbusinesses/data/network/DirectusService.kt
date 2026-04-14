@@ -16,7 +16,8 @@ interface DirectusService {
     @GET("items/leads/{id}")
     suspend fun getLeadDetails(
         @Header("Authorization") token: String,
-        @Path("id") id: String
+        @Path("id") id: String,
+        @Query("fields") fields: String = "id,name,description,type,location,owner,created_at,background_file"
     ): Response<LeadDetailsResponse>
 
     @GET("users/me")
@@ -105,6 +106,7 @@ interface DirectusService {
     suspend fun getMyLeads(
         @Header("Authorization") token: String,
         @Query("filter[owner][_eq]") ownerId: String,
+        @Query("fields") fields: String = "id,name,description,type,location,owner,created_at,background_file",
         @Query("sort") sort: String = "-created_at"
     ): Response<MyLeadsResponse>
 

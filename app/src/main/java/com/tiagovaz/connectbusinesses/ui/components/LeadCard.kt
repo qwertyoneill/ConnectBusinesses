@@ -2,10 +2,18 @@ package com.tiagovaz.connectbusinesses.ui.components
 
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -17,24 +25,26 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import coil.compose.rememberAsyncImagePainter
+import coil.compose.AsyncImage
 import com.tiagovaz.connectbusinesses.data.network.LeadItem
 import com.tiagovaz.connectbusinesses.utils.LeadImageUtils
 
 @Composable
 fun LeadCard(
     lead: LeadItem,
+    accessToken: String?,
     modifier: Modifier = Modifier,
     isActive: Boolean = false,
     shadowColor: Color = Color.Black.copy(alpha = 0.25f),
     borderColor: Color = Color.Transparent
 ) {
-    val imageUrl = LeadImageUtils.buildLeadImageUrl(lead.backgroundFile)
-        ?: "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=1080"
+    val imageUrl = LeadImageUtils.buildLeadImageUrl(
+        fileId = lead.backgroundFile,
+        accessToken = accessToken
+    )
 
     val cornerRadius by animateDpAsState(
         targetValue = if (isActive) 24.dp else 20.dp,
@@ -59,12 +69,20 @@ fun LeadCard(
             )
             .clip(RoundedCornerShape(cornerRadius))
     ) {
-        Image(
-            painter = rememberAsyncImagePainter(imageUrl),
-            contentDescription = lead.companyName,
-            modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.Crop
-        )
+        if (imageUrl != null) {
+            AsyncImage(
+                model = imageUrl,
+                contentDescription = lead.companyName,
+                modifier = Modifier.fillMaxSize(),
+                contentScale = androidx.compose.ui.layout.ContentScale.Crop
+            )
+        } else {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.DarkGray)
+            )
+        }
 
         Box(
             modifier = Modifier

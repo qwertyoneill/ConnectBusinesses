@@ -20,6 +20,7 @@ data class LeadDetailsUiState(
     val isAcceptingInterested: Boolean = false,
     val lead: LeadItem? = null,
     val interested: List<LeadInterestedItem> = emptyList(),
+    val imageAccessToken: String? = null,
     val error: String? = null,
     val interestedError: String? = null,
     val actionError: String? = null,
@@ -58,11 +59,12 @@ class LeadDetailsViewModel @Inject constructor(
                     it.copy(
                         isLoading = false,
                         lead = lead,
+                        imageAccessToken = token,
                         error = null
                     )
                 }
                 loadInterested(lead.id)
-            }else {
+            } else {
                 _uiState.update {
                     it.copy(
                         isLoading = false,
@@ -73,6 +75,7 @@ class LeadDetailsViewModel @Inject constructor(
             }
         }
     }
+
     fun deleteLead() {
         viewModelScope.launch {
             val token = dataStore.getAccessToken()
@@ -113,6 +116,7 @@ class LeadDetailsViewModel @Inject constructor(
                 }
         }
     }
+
     fun loadInterested(leadId: Int) {
         viewModelScope.launch {
             val token = dataStore.getAccessToken()
@@ -147,6 +151,7 @@ class LeadDetailsViewModel @Inject constructor(
                 }
         }
     }
+
     fun acceptInterested(
         interestedUserId: String,
         onConversationReady: (Int) -> Unit

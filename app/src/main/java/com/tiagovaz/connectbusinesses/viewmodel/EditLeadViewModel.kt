@@ -1,5 +1,7 @@
 package com.tiagovaz.connectbusinesses.viewmodel
 
+import android.content.Context
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.tiagovaz.connectbusinesses.data.network.DirectusRepository
@@ -47,6 +49,9 @@ class EditLeadViewModel @Inject constructor(
                         type = lead.type.orEmpty(),
                         description = lead.need.orEmpty(),
                         location = lead.city.orEmpty(),
+                        backgroundFile = lead.backgroundFile,
+                        imageAccessToken = token,
+                        selectedImageUri = null,
                         errorMessage = null
                     )
                 }
@@ -77,11 +82,18 @@ class EditLeadViewModel @Inject constructor(
         _uiState.update { it.copy(location = value) }
     }
 
+    fun onImageSelected(uri: Uri?) {
+        _uiState.update { it.copy(selectedImageUri = uri) }
+    }
+
     fun clearMessages() {
         _uiState.update { it.copy(successMessage = null, errorMessage = null) }
     }
 
-    fun submit(onSuccess: () -> Unit) {
+    fun submit(
+        context: Context,
+        onSuccess: () -> Unit
+    ) {
         viewModelScope.launch {
             val state = _uiState.value
             val token = dataStore.getAccessToken()
@@ -123,18 +135,41 @@ class EditLeadViewModel @Inject constructor(
                 )
             }
 
+            val backgroundFileResult = if (state.selectedImageUri != null) {
+                repository.uploadImage(
+                    token = token,
+                    context = context,
+                    uri = state.selectedImageUri
+                )
+            } else {
+                null
+            }
+
+            val backgroundFileId = backgroundFileResult?.getOrElse { error ->
+                _uiState.update {
+                    it.copy(
+                        isSubmitting = false,
+                        errorMessage = error.message ?: "Erro ao enviar imagem."
+                    )
+                }
+                return@launch
+            } ?: state.backgroundFile
+
             repository.updateLead(
                 token = token,
                 id = leadId,
                 name = state.name,
                 type = state.type,
                 description = state.description,
-                location = state.location
+                location = state.location,
+                backgroundFile = backgroundFileId
             ).onSuccess {
                 _uiState.update {
                     it.copy(
                         isSubmitting = false,
-                        successMessage = "Lead atualizada com sucesso."
+                        successMessage = "Lead atualizada com sucesso.",
+                        backgroundFile = backgroundFileId,
+                        imageAccessToken = token
                     )
                 }
                 onSuccess()

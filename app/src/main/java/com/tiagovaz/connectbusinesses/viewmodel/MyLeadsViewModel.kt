@@ -43,6 +43,7 @@ class MyLeadsViewModel @Inject constructor(
                         it.copy(
                             isLoading = false,
                             items = leads,
+                            imageAccessToken = token,
                             error = null
                         )
                     }

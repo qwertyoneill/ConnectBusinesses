@@ -1,13 +1,16 @@
 package com.tiagovaz.connectbusinesses.ui.navigation
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
@@ -27,15 +30,18 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import coil.compose.rememberAsyncImagePainter
+import com.tiagovaz.connectbusinesses.utils.LeadImageUtils
 import com.tiagovaz.connectbusinesses.viewmodel.LeadDetailsViewModel
-import java.time.OffsetDateTime
-import java.time.format.DateTimeFormatter
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
+import java.time.OffsetDateTime
+import java.time.format.DateTimeFormatter
 
 @Composable
 fun LeadDetailsScreen(
@@ -84,12 +90,35 @@ fun LeadDetailsScreen(
 
         state.lead != null -> {
             val lead = state.lead!!
+            val imageUrl = LeadImageUtils.buildLeadImageUrl(
+                fileId = lead.backgroundFile,
+                accessToken = state.imageAccessToken
+            )
 
             Column(
                 modifier = Modifier
                     .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
                     .padding(16.dp)
             ) {
+                if (imageUrl != null) {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(18.dp),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                    ) {
+                        Image(
+                            painter = rememberAsyncImagePainter(imageUrl),
+                            contentDescription = lead.companyName ?: "Imagem da lead",
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(220.dp),
+                            contentScale = ContentScale.Crop
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
 
                 Text(
                     text = lead.companyName ?: "Lead",
@@ -126,7 +155,6 @@ fun LeadDetailsScreen(
                 Spacer(modifier = Modifier.height(10.dp))
 
                 when {
-
                     state.isLoadingInterested -> {
                         CircularProgressIndicator()
                     }
@@ -139,23 +167,18 @@ fun LeadDetailsScreen(
                     }
 
                     else -> {
-
                         Column(
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-
                             state.interested.forEach { item ->
-
                                 Card(
                                     modifier = Modifier.fillMaxWidth(),
                                     shape = RoundedCornerShape(16.dp),
                                     elevation = CardDefaults.cardElevation(4.dp)
                                 ) {
-
                                     Column(
                                         modifier = Modifier.padding(16.dp)
                                     ) {
-
                                         val name = listOfNotNull(
                                             item.first_name,
                                             item.last_name
@@ -178,11 +201,9 @@ fun LeadDetailsScreen(
 
                                         Button(
                                             onClick = {
-
                                                 viewModel.acceptInterested(
                                                     item.interested_user_id
                                                 ) { conversationId ->
-
                                                     val safeUserName =
                                                         URLEncoder.encode(
                                                             name,
@@ -226,7 +247,6 @@ fun LeadDetailsScreen(
                     modifier = Modifier.fillMaxWidth(),
                     enabled = !state.isDeleting
                 ) {
-
                     if (state.isDeleting) {
                         CircularProgressIndicator(strokeWidth = 2.dp)
                     } else {
@@ -242,6 +262,8 @@ fun LeadDetailsScreen(
                 ) {
                     Text("Voltar")
                 }
+
+                Spacer(modifier = Modifier.height(24.dp))
             }
         }
     }
@@ -253,7 +275,6 @@ fun LeadDetailsScreen(
             },
             title = { Text("Apagar lead") },
             text = { Text("Tens a certeza que queres apagar esta lead? Esta ação não pode ser desfeita.") },
-
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -265,7 +286,6 @@ fun LeadDetailsScreen(
                     Text("Apagar")
                 }
             },
-
             dismissButton = {
                 TextButton(
                     onClick = { showDeleteDialog = false },
@@ -279,23 +299,16 @@ fun LeadDetailsScreen(
 }
 
 @Composable
-private fun DetailRow(
-    label: String,
-    value: String
-) {
-
+private fun DetailRow(label: String, value: String) {
     Column(
-        modifier = Modifier.padding(bottom = 12.dp)
+        modifier = Modifier.padding(vertical = 6.dp)
     ) {
-
         Text(
             text = label,
             style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = MaterialTheme.colorScheme.primary
         )
-
-        Spacer(modifier = Modifier.height(4.dp))
-
+        Spacer(modifier = Modifier.height(2.dp))
         Text(
             text = value,
             style = MaterialTheme.typography.bodyLarge
@@ -304,17 +317,10 @@ private fun DetailRow(
 }
 
 private fun formatLeadDate(raw: String): String {
-
     return try {
-
         val date = OffsetDateTime.parse(raw)
-
-        date.format(
-            DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")
-        )
-
+        date.format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"))
     } catch (_: Exception) {
-
         raw
     }
 }

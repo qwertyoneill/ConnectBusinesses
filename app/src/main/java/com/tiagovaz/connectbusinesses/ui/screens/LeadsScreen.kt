@@ -1,10 +1,20 @@
 package com.tiagovaz.connectbusinesses.ui.screens
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
@@ -27,16 +37,9 @@ fun LeadsScreen(
     val token by authViewModel.token.collectAsState()
     val leads by leadsViewModel.leads.collectAsState(initial = emptyList())
     val isLoading by leadsViewModel.isLoading.collectAsState()
-    android.util.Log.d(
-        "AUTH_TOKEN",
-        "TOKEN NO SCREEN: ${token?.take(40)}"
-    )
-
 
     LaunchedEffect(token) {
-        android.util.Log.d("TOKEN_SCREEN", "TOKEN NO SCREEN: $token")
         if (!token.isNullOrEmpty()) {
-            android.util.Log.d("TOKEN_SCREEN", "CHAMAR fetchLeads()")
             leadsViewModel.fetchLeads(token!!)
         }
     }
@@ -67,6 +70,7 @@ fun LeadsScreen(
                 ) { lead, isActive, shadowColor, borderColor ->
                     LeadCard(
                         lead = lead,
+                        accessToken = token,
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(screenHeight - 80.dp)
@@ -84,7 +88,6 @@ fun LeadsScreen(
                     verticalArrangement = Arrangement.Center,
                     modifier = Modifier.fillMaxSize()
                 ) {
-
                     Text(
                         text = "🚀",
                         style = MaterialTheme.typography.displayMedium
@@ -96,7 +99,6 @@ fun LeadsScreen(
                         text = "Não existem mais leads",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold
-
                     )
 
                     Spacer(modifier = Modifier.height(6.dp))
