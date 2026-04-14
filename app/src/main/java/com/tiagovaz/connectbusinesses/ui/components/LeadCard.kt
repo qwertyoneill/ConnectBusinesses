@@ -43,7 +43,10 @@ fun LeadCard(
 ) {
     val imageUrl = LeadImageUtils.buildLeadImageUrl(
         fileId = lead.backgroundFile,
-        accessToken = accessToken
+        accessToken = accessToken,
+        width = 900,
+        height = 1600,
+        quality = 82
     )
 
     val cornerRadius by animateDpAsState(

@@ -112,7 +112,10 @@ private fun MyLeadCard(
 ) {
     val imageUrl = LeadImageUtils.buildLeadImageUrl(
         fileId = lead.backgroundFile,
-        accessToken = accessToken
+        accessToken = accessToken,
+        width = 1200,
+        height = 700,
+        quality = 82
     )
 
     Card(

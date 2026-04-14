@@ -72,7 +72,10 @@ fun EditLeadScreen(
         else -> {
             val currentImageUrl = LeadImageUtils.buildLeadImageUrl(
                 fileId = state.backgroundFile,
-                accessToken = state.imageAccessToken
+                accessToken = state.imageAccessToken,
+                width = 1200,
+                height = 700,
+                quality = 85
             )
 
             Column(

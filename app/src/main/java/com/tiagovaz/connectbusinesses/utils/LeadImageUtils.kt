@@ -8,18 +8,24 @@ object LeadImageUtils {
 
     fun buildLeadImageUrl(
         fileId: String?,
-        accessToken: String? = null
+        accessToken: String? = null,
+        width: Int = 900,
+        height: Int = 1600,
+        quality: Int = 82
     ): String? {
         val cleanId = fileId?.trim()
-
         if (cleanId.isNullOrEmpty()) return null
 
-        val base = "$BASE_URL/assets/$cleanId"
+        val params = buildList {
+            add("width=$width")
+            add("height=$height")
+            add("fit=cover")
+            add("quality=$quality")
+            if (!accessToken.isNullOrBlank()) {
+                add("access_token=${Uri.encode(accessToken)}")
+            }
+        }.joinToString("&")
 
-        return if (accessToken.isNullOrBlank()) {
-            "$base?width=1200&height=675&fit=cover"
-        } else {
-            "$base?access_token=${Uri.encode(accessToken)}&width=1200&height=675&fit=cover"
-        }
+        return "$BASE_URL/assets/$cleanId?$params"
     }
 }

@@ -92,7 +92,10 @@ fun LeadDetailsScreen(
             val lead = state.lead!!
             val imageUrl = LeadImageUtils.buildLeadImageUrl(
                 fileId = lead.backgroundFile,
-                accessToken = state.imageAccessToken
+                accessToken = state.imageAccessToken,
+                width = 1400,
+                height = 900,
+                quality = 85
             )
 
             Column(
