@@ -1,5 +1,6 @@
 package com.tiagovaz.connectbusinesses.ui.screens
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -22,15 +23,19 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
-import coil.compose.rememberAsyncImagePainter
+import coil.compose.AsyncImagePainter
 import com.tiagovaz.connectbusinesses.data.network.MyLeadItem
 import com.tiagovaz.connectbusinesses.utils.LeadImageUtils
 import com.tiagovaz.connectbusinesses.viewmodel.MyLeadsViewModel
@@ -118,6 +123,10 @@ private fun MyLeadCard(
         quality = 82
     )
 
+    var imageState by remember(imageUrl) {
+        mutableStateOf<AsyncImagePainter.State>(AsyncImagePainter.State.Empty)
+    }
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -127,14 +136,49 @@ private fun MyLeadCard(
     ) {
         Column {
             if (imageUrl != null) {
-                AsyncImage(
-                    model = imageUrl,
-                    contentDescription = lead.name,
+                Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(180.dp),
-                    contentScale = ContentScale.Crop
-                )
+                        .height(180.dp)
+                ) {
+                    AsyncImage(
+                        model = imageUrl,
+                        contentDescription = lead.name,
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop,
+                        onState = { imageState = it }
+                    )
+
+                    when (imageState) {
+                        is AsyncImagePainter.State.Loading,
+                        is AsyncImagePainter.State.Empty -> {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(Color(0xFF1E1E1E)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                CircularProgressIndicator()
+                            }
+                        }
+
+                        is AsyncImagePainter.State.Error -> {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(Color(0xFF2A2A2A)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = "Sem imagem",
+                                    color = Color.White.copy(alpha = 0.85f)
+                                )
+                            }
+                        }
+
+                        is AsyncImagePainter.State.Success -> Unit
+                    }
+                }
             }
 
             Column(
