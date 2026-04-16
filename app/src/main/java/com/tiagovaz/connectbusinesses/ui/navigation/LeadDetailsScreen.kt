@@ -3,11 +3,14 @@ package com.tiagovaz.connectbusinesses.ui.navigation
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -150,12 +153,30 @@ fun LeadDetailsScreen(
                 Spacer(modifier = Modifier.height(20.dp))
 
                 Text(
-                    text = "Interessados neste lead",
+                    text = "Interessados (${state.interested.size})",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold
                 )
 
                 Spacer(modifier = Modifier.height(10.dp))
+
+                state.interestedError?.let { interestedError ->
+                    Text(
+                        text = interestedError,
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+
+                state.actionError?.let { actionError ->
+                    Text(
+                        text = actionError,
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
 
                 when {
                     state.isLoadingInterested -> {
@@ -164,7 +185,7 @@ fun LeadDetailsScreen(
 
                     state.interested.isEmpty() -> {
                         Text(
-                            text = "Ainda não existem interessados.",
+                            text = "Ainda ninguém demonstrou interesse neste lead.",
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
@@ -174,6 +195,17 @@ fun LeadDetailsScreen(
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             state.interested.forEach { item ->
+                                val name = listOfNotNull(
+                                    item.first_name,
+                                    item.last_name
+                                ).joinToString(" ").ifBlank { "Utilizador" }
+
+                                val isAccepting =
+                                    state.acceptingInterestedUserId == item.interested_user_id
+                                val isOpening =
+                                    state.openingConversationUserId == item.interested_user_id
+                                val isBusy = state.isUserBusy(item.interested_user_id)
+
                                 Card(
                                     modifier = Modifier.fillMaxWidth(),
                                     shape = RoundedCornerShape(16.dp),
@@ -182,11 +214,6 @@ fun LeadDetailsScreen(
                                     Column(
                                         modifier = Modifier.padding(16.dp)
                                     ) {
-                                        val name = listOfNotNull(
-                                            item.first_name,
-                                            item.last_name
-                                        ).joinToString(" ").ifBlank { "Utilizador" }
-
                                         Text(
                                             text = name,
                                             fontWeight = FontWeight.Bold
@@ -207,25 +234,57 @@ fun LeadDetailsScreen(
                                                 viewModel.acceptInterested(
                                                     item.interested_user_id
                                                 ) { conversationId ->
-                                                    val safeUserName =
-                                                        URLEncoder.encode(
-                                                            name,
-                                                            StandardCharsets.UTF_8.toString()
-                                                        )
+                                                    val safeUserName = URLEncoder.encode(
+                                                        name,
+                                                        StandardCharsets.UTF_8.toString()
+                                                    )
 
-                                                    val safeLeadName =
-                                                        URLEncoder.encode(
-                                                            lead.companyName ?: "Lead",
-                                                            StandardCharsets.UTF_8.toString()
-                                                        )
+                                                    val safeLeadName = URLEncoder.encode(
+                                                        lead.companyName ?: "Lead",
+                                                        StandardCharsets.UTF_8.toString()
+                                                    )
 
                                                     navController.navigate(
                                                         "chat/$conversationId/$safeUserName/${lead.id}/$safeLeadName"
                                                     )
                                                 }
-                                            }
+                                            },
+                                            modifier = Modifier.fillMaxWidth(),
+                                            enabled = !isBusy
                                         ) {
-                                            Text("Aceitar e abrir conversa")
+                                            when {
+                                                isAccepting -> {
+                                                    Row(
+                                                        verticalAlignment = Alignment.CenterVertically,
+                                                        horizontalArrangement = Arrangement.Center
+                                                    ) {
+                                                        CircularProgressIndicator(
+                                                            modifier = Modifier.size(16.dp),
+                                                            strokeWidth = 2.dp
+                                                        )
+                                                        Spacer(modifier = Modifier.width(8.dp))
+                                                        Text("A aceitar...")
+                                                    }
+                                                }
+
+                                                isOpening -> {
+                                                    Row(
+                                                        verticalAlignment = Alignment.CenterVertically,
+                                                        horizontalArrangement = Arrangement.Center
+                                                    ) {
+                                                        CircularProgressIndicator(
+                                                            modifier = Modifier.size(16.dp),
+                                                            strokeWidth = 2.dp
+                                                        )
+                                                        Spacer(modifier = Modifier.width(8.dp))
+                                                        Text("A abrir conversa...")
+                                                    }
+                                                }
+
+                                                else -> {
+                                                    Text("Aceitar e abrir conversa")
+                                                }
+                                            }
                                         }
                                     }
                                 }
@@ -251,7 +310,10 @@ fun LeadDetailsScreen(
                     enabled = !state.isDeleting
                 ) {
                     if (state.isDeleting) {
-                        CircularProgressIndicator(strokeWidth = 2.dp)
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(18.dp),
+                            strokeWidth = 2.dp
+                        )
                     } else {
                         Text("Apagar")
                     }
