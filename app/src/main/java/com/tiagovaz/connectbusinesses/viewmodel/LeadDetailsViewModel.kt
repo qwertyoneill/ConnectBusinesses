@@ -17,7 +17,8 @@ data class LeadDetailsUiState(
     val isLoading: Boolean = false,
     val isDeleting: Boolean = false,
     val isLoadingInterested: Boolean = false,
-    val isAcceptingInterested: Boolean = false,
+    val acceptingInterestedUserId: String? = null,
+    val openingConversationUserId: String? = null,
     val lead: LeadItem? = null,
     val interested: List<LeadInterestedItem> = emptyList(),
     val imageAccessToken: String? = null,
@@ -25,7 +26,11 @@ data class LeadDetailsUiState(
     val interestedError: String? = null,
     val actionError: String? = null,
     val deleteSuccess: Boolean = false
-)
+) {
+    fun isUserBusy(userId: String): Boolean {
+        return acceptingInterestedUserId == userId || openingConversationUserId == userId
+    }
+}
 
 @HiltViewModel
 class LeadDetailsViewModel @Inject constructor(
@@ -129,7 +134,10 @@ class LeadDetailsViewModel @Inject constructor(
             }
 
             _uiState.update {
-                it.copy(isLoadingInterested = true, interestedError = null)
+                it.copy(
+                    isLoadingInterested = true,
+                    interestedError = null
+                )
             }
 
             repository.fetchInterestedInLead(token, leadId)
@@ -145,7 +153,7 @@ class LeadDetailsViewModel @Inject constructor(
                     _uiState.update {
                         it.copy(
                             isLoadingInterested = false,
-                            interestedError = e.message
+                            interestedError = e.message ?: "Erro ao carregar interessados."
                         )
                     }
                 }
@@ -174,33 +182,58 @@ class LeadDetailsViewModel @Inject constructor(
                 return@launch
             }
 
+            if (_uiState.value.isUserBusy(interestedUserId)) return@launch
+
             _uiState.update {
-                it.copy(isAcceptingInterested = true, actionError = null)
+                it.copy(
+                    acceptingInterestedUserId = interestedUserId,
+                    openingConversationUserId = null,
+                    actionError = null
+                )
             }
 
             repository.acceptInterestedInLead(token, leadId, interestedUserId)
                 .onSuccess { acceptResult ->
+                    _uiState.update { current ->
+                        current.copy(
+                            acceptingInterestedUserId = null,
+                            openingConversationUserId = interestedUserId,
+                            actionError = null,
+                            interested = current.interested.filterNot {
+                                it.interested_user_id == interestedUserId
+                            }
+                        )
+                    }
+
                     repository.openConversationFromMatch(token, acceptResult.match_id)
                         .onSuccess { conversationId ->
-                            loadInterested(leadId)
                             _uiState.update {
-                                it.copy(isAcceptingInterested = false, actionError = null)
+                                it.copy(
+                                    openingConversationUserId = null,
+                                    actionError = null
+                                )
                             }
+
+                            loadInterested(leadId)
                             onConversationReady(conversationId)
                         }
                         .onFailure { e ->
-                            _uiState.update {
-                                it.copy(
-                                    isAcceptingInterested = false,
+                            _uiState.update { current ->
+                                current.copy(
+                                    acceptingInterestedUserId = null,
+                                    openingConversationUserId = null,
                                     actionError = e.message ?: "Erro ao abrir conversa."
                                 )
                             }
+
+                            loadInterested(leadId)
                         }
                 }
                 .onFailure { e ->
                     _uiState.update {
                         it.copy(
-                            isAcceptingInterested = false,
+                            acceptingInterestedUserId = null,
+                            openingConversationUserId = null,
                             actionError = e.message ?: "Erro ao aceitar interessado."
                         )
                     }
